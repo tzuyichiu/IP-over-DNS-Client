@@ -1,32 +1,12 @@
-//Header Files
-#include <stdio.h> //printf
+#include <stdio.h>  //printf
 #include <string.h> //strlen
 #include <stdlib.h> //malloc
 
 #include "DNS_Encode.h"
-/*
-int main(int argc, char* argv[])
-{
-    char msg[128];
+#include "flag.h"
 
-	printf("Enter the msg to encode: ");
-	fgets(msg, 128, stdin);
-
-	// Remove trailing newline, if there is.
-	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
-	{msg[strlen(msg)-1] = '\0';}
-	
-	char *dns = malloc(128);
-	printf("Original = '%s'\n", msg);
-	ChangetoDnsNameFormat(dns, msg); 
-
-	printf("Encoded = '%s'\n", dns);
-	free(dns);
-	return 0;
-}
-*/
-
-/* Split the message into sections of 63 bits (because in QNAME each word between the dots only has 64 bits)
+/**
+ * Split the message into sections of 63 bits (because in QNAME each word between the dots only has 64 bits)
  * The first word can only have 62 bits ("d" in front and "." behind)
  * The others can have 63 ("." behind)
  */
@@ -108,3 +88,25 @@ int ChangetoDnsNameFormat(unsigned char* qname, unsigned char* msg, int len_msg)
     printf(" (%d bytes)\n", run_qname);
     return run_qname;
 }
+
+/*
+int main(int argc, char* argv[])
+{
+    char msg[128];
+
+	printf("Enter the msg to encode: ");
+	fgets(msg, 128, stdin);
+
+	// Remove trailing newline, if there is.
+	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
+	{msg[strlen(msg)-1] = '\0';}
+	
+	char *dns = malloc(128);
+	printf("Original = '%s'\n", msg);
+	ChangetoDnsNameFormat(dns, msg); 
+
+	printf("Encoded = '%s'\n", dns);
+	free(dns);
+	return 0;
+}
+*/

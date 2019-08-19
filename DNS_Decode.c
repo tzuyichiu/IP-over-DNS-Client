@@ -1,31 +1,11 @@
-//Header Files
 #include <stdio.h> //printf
 #include <string.h> //strlen
 #include <stdlib.h> //malloc
 
 #include "DNS_Decode.h"
+#include "flag.h"
 
-#define MAX_SZ 32768
-
-/*
-int main(int argc, char* argv[])
-{
-    char msg[MAX_SZ];
-
-	printf("Enter the msg to decode: ");
-	fgets(msg, MAX_SZ, stdin);
-
-    // Remove trailing newline, if there is.
-    if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
-    {msg[strlen(msg)-1] = '\0';}
-
-	char* decoded = DNS_Unsplit(msg);
-	free(decoded);
-	return 0;
-}
-*/
-
-int DNS_Unsplit(char* unsplit, char* msg,int len)
+int DNS_Unsplit(char* unsplit, char* msg, int len)
 {
 	printf("Original = '%s'\n", msg);
 
@@ -111,3 +91,21 @@ void ReadName(char* buffer,int length){
 /*        printf("%d\n",delta);*/
     }
 }
+
+/*
+int main(int argc, char* argv[])
+{
+    char msg[MAX_SZ];
+
+	printf("Enter the msg to decode: ");
+	fgets(msg, MAX_SZ, stdin);
+
+    // Remove trailing newline, if there is.
+    if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
+    {msg[strlen(msg)-1] = '\0';}
+
+	char* decoded = DNS_Unsplit(msg);
+	free(decoded);
+	return 0;
+}
+*/

@@ -1,54 +1,47 @@
-//Change our message into a DNS Query
-
 /*
-Modified from :
-https://gist.github.com/fffaraz/9d9170b57791c28ccda9255b48315168
-which orginally performs a DNS Query from input hostname
+ * Modified from :
+ * https://gist.github.com/fffaraz/9d9170b57791c28ccda9255b48315168
+ * which orginally performs a DNS Query from input hostname
+ * 
+ * Author : Silver Moon (m00n.silv3r@gmail.com)
+ * Dated : 29/4/2009
+ * */
 
-Author : Silver Moon (m00n.silv3r@gmail.com)
-Dated : 29/4/2009
-*/
-
-//Header Files
-#include <stdio.h> //printf
-#include <string.h> //strlen
-#include <stdlib.h> //malloc
-#include <sys/socket.h> //you know what this is for
-#include <arpa/inet.h> //inet_addr , inet_ntoa , ntohs etc
+#include <stdio.h>      //printf
+#include <string.h>     //strlen
+#include <stdlib.h>     //malloc
+#include <sys/socket.h> //sockets
+#include <arpa/inet.h>  //inet_addr , inet_ntoa , ntohs etc
 #include <netinet/in.h>
-#include <unistd.h> //getpid
+#include <unistd.h>     //getpid
 
 #include "DNS_Query.h"
 #include "DNS_Encode.h"
-
-
-#define MAX_SZ 32768
+#include "flag.h"
 
 /*
  * Perform a DNS query by sending a packet combining msg and hostname
  * */
 void DNS_Query(int nature, void* sockfd_void, char *msg, int len_msg, char *host, char *ip_dns_server, int query_type)
 {
-    struct DNS_PACKET *dnspacket = NULL;
-    dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
-    dnspacket->header = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
-    dnspacket->question = (struct QUESTION*) malloc(sizeof(struct QUESTION));
-    dnspacket->question->qname = (char*) malloc(MAX_SZ);
-    dnspacket->record = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
-    dnspacket->record->name = (unsigned char*) malloc(sizeof(unsigned char)*2);
-    dnspacket->record->resource = (struct R_DATA*) malloc(sizeof(struct R_DATA));
-    dnspacket->record->rdata = (unsigned char*) malloc(sizeof(unsigned char)*2);
+    struct DNS_PACKET *dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
+    dnspacket->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
+    dnspacket->question          = (struct QUESTION*)   malloc(sizeof(struct QUESTION));
+    dnspacket->question->qname   = (char*)              malloc(MAX_SZ);
+    dnspacket->record            = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
+    dnspacket->record->name      = (unsigned char*)     malloc(sizeof(unsigned char)*2);
+    dnspacket->record->resource  = (struct R_DATA*)     malloc(sizeof(struct R_DATA));
+    dnspacket->record->rdata     = (unsigned char*)     malloc(sizeof(unsigned char)*2);
 
     int s = *(int *) sockfd_void;
 
     struct sockaddr_in dest;
-    dest.sin_family = AF_INET;
-    dest.sin_port = htons(5000); //DNS uses the port 53
+    dest.sin_family      = AF_INET;
+    dest.sin_port        = htons(5000); //DNS uses the port 53
     dest.sin_addr.s_addr = inet_addr(ip_dns_server);
 
     // DNS_HEADER
-    struct DNS_HEADER* header = NULL;
-    header = dnspacket->header;
+    struct DNS_HEADER* header = dnspacket->header;
     
     header->id = (unsigned short) htons(getpid());
     header->qr = 0; //This is a query

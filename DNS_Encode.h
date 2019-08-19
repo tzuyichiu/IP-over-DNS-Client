@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef DNS_SPLIT_H
 #define DNS_SPLIT_H
 
