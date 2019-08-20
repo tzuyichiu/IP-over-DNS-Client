@@ -13,6 +13,6 @@
 #ifndef DNS_LISTEN_H
 #define DNS_LISTEN_H
 
-char* Listen(void* sockfd_void, char *ip_dns_server);
+char* DNS_Listen(void* sockfd_void, char *ip_dns_server);
 
 #endif

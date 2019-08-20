@@ -24,7 +24,7 @@
 #include "DNS_Client.h"
 #include "DNS_Query.h"
 #include "DNS_Listen.h"
-#include "ourStructs.h"
+#include "DNS_flag.h"
 
 pthread_mutex_t sendmutex;
 pthread_mutex_t receivemutex;
@@ -199,7 +199,7 @@ void *receiving(void *args_void)
 		DNS_Query(0, sockfd_void, ".", 0, host, ip_dns_server, T_TXT);
 	
 		// see DNS_Listen.c 
-		unsigned char *received = (unsigned char*) Listen(sockfd_void, ip_dns_server);
+		unsigned char *received = (unsigned char*) DNS_Listen(sockfd_void, ip_dns_server);
 		int len_qname = received[0]*256 + received[1];
 		int indice_hostname = received[2]*256 + received[3];
 		

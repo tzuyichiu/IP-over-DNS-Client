@@ -15,12 +15,12 @@
 #include <netinet/in.h>
 #include <unistd.h> //getpid
 
-#include "flag.h"
+#include "DNS_flag.h"
 #include "DNS_Query.h"
 #include "DNS_Listen.h"
 #include "DNS_Decode.h"
 
-char* Listen(void* sockfd_void, char *ip_dns_server)
+char* DNS_Listen(void* sockfd_void, char *ip_dns_server)
 {	
 	char buf[MAX_SZ*2];
 	memset(buf, 0, MAX_SZ*2);

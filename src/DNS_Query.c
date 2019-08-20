@@ -17,7 +17,7 @@
 
 #include "DNS_Query.h"
 #include "DNS_Encode.h"
-#include "flag.h"
+#include "DNS_flag.h"
 
 /*
  * Perform a DNS query by sending a packet combining msg and hostname

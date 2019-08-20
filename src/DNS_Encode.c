@@ -3,7 +3,7 @@
 #include <stdlib.h> //malloc
 
 #include "DNS_Encode.h"
-#include "flag.h"
+#include "DNS_flag.h"
 
 /**
  * Split the message into sections of 63 bits (because in QNAME each word between the dots only has 64 bits)

@@ -1,4 +1,4 @@
-#include "flag.h"
+#include "DNS_flag.h"
 
 const int MAX_SZ = 32768;
 

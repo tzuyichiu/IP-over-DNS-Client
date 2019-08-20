@@ -3,7 +3,7 @@
 #include <stdlib.h> //malloc
 
 #include "DNS_Decode.h"
-#include "flag.h"
+#include "DNS_flag.h"
 
 int DNS_Unsplit(char* unsplit, char* msg, int len)
 {
