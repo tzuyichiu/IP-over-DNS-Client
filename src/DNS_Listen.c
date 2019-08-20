@@ -18,7 +18,6 @@
 #include "DNS_flag.h"
 #include "DNS_Query.h"
 #include "DNS_Listen.h"
-#include "DNS_Decode.h"
 
 char* DNS_Listen(void* sockfd_void, char *ip_dns_server)
 {	

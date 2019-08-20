@@ -22,7 +22,8 @@
 /*
  * Perform a DNS query by sending a packet combining msg and hostname
  * */
-void DNS_Query(int nature, void* sockfd_void, char *msg, int len_msg, char *host, char *ip_dns_server, int query_type)
+void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg, 
+                char *host, char *ip_dns_server, int query_type)
 {
     struct DNS_PACKET *dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
     dnspacket->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));

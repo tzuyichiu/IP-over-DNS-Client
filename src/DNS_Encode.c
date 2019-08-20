@@ -5,11 +5,12 @@
 #include "DNS_Encode.h"
 #include "DNS_flag.h"
 
-/**
+
+/*
  * Split the message into sections of 63 bits (because in QNAME each word between the dots only has 64 bits)
  * The first word can only have 62 bits ("d" in front and "." behind)
  * The others can have 63 ("." behind)
- */
+ * */
 
 int DNS_Split(unsigned char* split, unsigned char* msg, int length)
 {
@@ -50,46 +51,75 @@ int DNS_Split(unsigned char* split, unsigned char* msg, int length)
 
 
 /*
-The following is modified from :
-https://gist.github.com/fffaraz/9d9170b57791c28ccda9255b48315168
-which orginally performs a DNS Query from input hostname
-
-Author : Silver Moon (m00n.silv3r@gmail.com)
-Dated : 29/4/2009
-*/
-
-/*
- * This will convert www.google.com to 3www6google3com 
+ * to_Qname_format
+ *
+ * if msg = "www.google.com"
+ * then 3www6google3com0 will be stocked into qname
+ * return 1+3+1+6+1+3+1=16 offset
  * */
-int ChangetoDnsNameFormat(unsigned char* qname, unsigned char* msg, int len_msg) 
-{
-    int run_qname = 0, run_msg = 0;
-    msg[len_msg] = '.';
-    
-    printf("DNS Format:\n");
-    for(int i=0; i<len_msg+1; i++) 
+int to_Qname_format(unsigned char* qname, unsigned char* msg, int len_msg) 
+{   
+    int run_qname = 0; 
+    int run_label = 1;
+    int run_msg = 0;
+
+    qname[0] = 0;
+
+    while (run_msg < len_msg)
     {
-        if(msg[i]=='.')
+        if (msg[run_msg] != '.')
         {
-            qname[run_qname] = i-run_msg;
-            printf("%d ", i-run_msg);
-            run_qname += 1;
-            
-            for (int j=0; j<i-run_msg; j++) 
-            {
-                qname[run_qname] = msg[run_msg+j];
-                printf("%d ", msg[run_msg+j]);
-                run_qname++;
-            }
-            run_msg = i+1;
+        	qname[run_qname]++;
+        	qname[run_qname+run_label] = msg[run_msg];
+        	run_label++;
         }
+        else
+    	{
+	        run_qname += run_label;
+	        qname[run_qname] = 0;
+	        run_label = 1;
+        }
+        run_msg++;
     }
-    qname[run_qname] = '\0';
-    printf(" (%d bytes)\n", run_qname);
-    return run_qname;
+    run_qname += run_label;
+    qname[run_qname] = 0;
+    return run_qname+1;
 }
 
+
 /*
+ * from_Qname_format
+ *
+ * if msg = 3www6google3com0
+ * then "www.google.com" will be stocked into qname
+ * return 3+1+6+1+3=14 string length
+ * */
+int from_Qname_format(unsigned char* msg, unsigned char* qname, int len_qname) 
+{   
+	int run_msg = 0;
+	int run_qname = 0;
+	int run_label = 1;
+
+	while (run_qname < len_qname)
+	{
+		while (run_label <= qname[run_qname])
+		{
+			msg[run_msg] = qname[run_qname+run_label];
+			run_label++;
+			run_msg++;
+		}
+		run_qname += run_label;
+		
+		if (run_qname != len_qname)
+			msg[run_msg] = '.';
+		run_label = 1;
+		run_msg++;
+	}
+	return run_msg-1;
+}
+
+
+// testing purposes (comment include files)
 int main(int argc, char* argv[])
 {
     char msg[128];
@@ -99,14 +129,26 @@ int main(int argc, char* argv[])
 
 	// Remove trailing newline, if there is.
 	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
-	{msg[strlen(msg)-1] = '\0';}
+		msg[strlen(msg)-1] = '\0';
 	
 	char *dns = malloc(128);
-	printf("Original = '%s'\n", msg);
-	ChangetoDnsNameFormat(dns, msg); 
-
-	printf("Encoded = '%s'\n", dns);
+	printf("Original = (%zu bytes) %s\n", strlen(msg), msg);
+	
+	int offset = to_Qname_format(dns, msg, strlen(msg)); 
+	printf("Encoded = (%d bytes) ", offset);
+	
+	for (int i=0; i<offset; i++)
+	{
+		if (dns[i] >= 32 && dns[i] <= 126)
+			printf("%c", dns[i]);
+		else
+			printf("%d", dns[i]);
+	}
+	printf("\n");
+	
+	int msg_len = from_Qname_format(msg, dns, offset-1);
 	free(dns);
+
+	printf("Decoded = (%d bytes) %.*s\n", msg_len, msg_len, msg);
 	return 0;
 }
-*/

@@ -4,10 +4,10 @@ CFLAGS=-I$(IDIR)
 
 ODIR=obj
 
-_DEPS = DNS_Client.h DNS_Decode.h DNS_Encode.h DNS_Listen.h DNS_Query.h
+_DEPS = DNS_Client.h DNS_Encode.h DNS_Listen.h DNS_Query.h DNS_Packet.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = DNS_Client.o DNS_Decode.o DNS_Encode.o DNS_Listen.o DNS_Query.o DNS_flag.o
+_OBJ = DNS_Client.o DNS_Encode.o DNS_Listen.o DNS_Query.o DNS_flag.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
