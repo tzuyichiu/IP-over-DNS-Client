@@ -9,6 +9,14 @@
 #ifndef DNS_CLIENT_H
 #define DNS_CLIENT_H
 
+struct thread_args 
+{
+	int  tapfd;
+	int  sockfd;
+	char *ip_dns_server;
+	char *host;
+};
+
 void *sending   (void *threadArgsVoid);
 void *receiving (void *threadArgsVoid);
 int tun_alloc (char *dev, int flags);

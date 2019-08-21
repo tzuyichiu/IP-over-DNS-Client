@@ -6,95 +6,64 @@
 #include "DNS_flag.h"
 
 
-/*
- * Split the message into sections of 63 bits (because in QNAME each word between the dots only has 64 bits)
- * The first word can only have 62 bits ("d" in front and "." behind)
- * The others can have 63 ("." behind)
- * */
-
-int DNS_Split(unsigned char* split, unsigned char* msg, int length)
+int to_Qname(unsigned char* qname, unsigned char* packet, int len_packet)
 {
-	int comp_spl = 0;
-	int comp_msg = 0;
-	int size_pack = 58;
+	int run_qname = 0;
+	int run_label = 1;
+	int run_packet = 0;
 
-	printf("Msg split:\n");
-	while (1)
+	qname[run_qname] = 0;
+	while (run_packet < len_packet)
 	{
-		for (int j=0; j<size_pack; j++)
+		if (run_label < 64)
 		{
-			if (comp_msg < length)
-			{
-				split[comp_spl] = msg[comp_msg];
-				printf("%d ", msg[comp_msg]);
-				comp_spl++;
-				comp_msg++;
-			}
-			else {
-				printf(" (%d bytes)\n", comp_spl);
-				return comp_spl;
-			}
+			qname[run_qname+run_label] = packet[run_packet];
+			run_packet++;
+			run_label++;
+			qname[run_qname]++;	
 		}
-		if (comp_msg+1 < length)
+		else
 		{
-			split[comp_spl] = '.';
-			printf(". ");
-			comp_spl++;
+			run_qname += run_label;
+			qname[run_qname] = 0;
+			run_label = 1;
 		}
-		else {
-			printf(" (%d bytes)\n", comp_spl);
-			return comp_spl;
-		}
-		size_pack = 63;
 	}
+	run_qname += run_label;
+	qname[run_qname] = '\0';
+	return run_qname+1;
 }
 
 
-/*
- * to_Qname_format
- *
- * if msg = "www.google.com"
- * then 3www6google3com0 will be stocked into qname
- * return 1+3+1+6+1+3+1=16 offset
- * */
-int to_Qname_format(unsigned char* qname, unsigned char* msg, int len_msg) 
-{   
-    int run_qname = 0; 
-    int run_label = 1;
-    int run_msg = 0;
+info_qnames to_Qnames(unsigned char** qnames, unsigned char* msg, int len_msg)
+{
+	int run_msg = 0;
+	int run_qnames = 0;
 
-    qname[0] = 0;
+	info_qnames info;
+	info.nb_packets = 0;
 
-    while (run_msg < len_msg)
-    {
-        if (msg[run_msg] != '.')
-        {
-        	qname[run_qname]++;
-        	qname[run_qname+run_label] = msg[run_msg];
-        	run_label++;
-        }
-        else
-    	{
-	        run_qname += run_label;
-	        qname[run_qname] = 0;
-	        run_label = 1;
-        }
-        run_msg++;
-    }
-    run_qname += run_label;
-    qname[run_qname] = 0;
-    return run_qname+1;
+	while (run_msg < len_msg)
+	{
+		if (len_msg-run_msg >= 251)
+		{
+			info.last_offset = to_Qname(qnames[run_qnames], msg+run_msg, 251);
+			run_msg += 251;
+		}
+		else
+		{
+			info.last_offset = to_Qname(qnames[run_qnames], msg+run_msg, len_msg-run_msg);
+			run_msg = len_msg;
+		}
+		run_qnames++;
+		info.nb_packets++; 
+	}
+	return info;
 }
 
 
-/*
- * from_Qname_format
- *
- * if msg = 3www6google3com0
- * then "www.google.com" will be stocked into qname
- * return 3+1+6+1+3=14 string length
- * */
-int from_Qname_format(unsigned char* msg, unsigned char* qname, int len_qname) 
+
+int from_Qname(unsigned char* msg, unsigned char* qname, int len_qname) 
 {   
 	int run_msg = 0;
 	int run_qname = 0;
@@ -122,33 +91,62 @@ int from_Qname_format(unsigned char* msg, unsigned char* qname, int len_qname)
 // testing purposes (comment include files)
 int main(int argc, char* argv[])
 {
-    char msg[128];
+    unsigned char msg[1024];
 
+    for (int i=0; i<1000; i++)
+    	msg[i] = 1;
+    msg[1000] = '\0';
+
+	/*
 	printf("Enter the msg to encode: ");
-	fgets(msg, 128, stdin);
+	fgets(msg, 1024, stdin);
 
 	// Remove trailing newline, if there is.
 	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
 		msg[strlen(msg)-1] = '\0';
+	*/
+
+	unsigned char **qnames = malloc(16); 
+	for (int i=0; i<16; i++)
+		qnames[i] = malloc(256);
+
+	printf("Original = (1000 bytes)\n");
+
+	for (int i=0; i<1000; i++)
+		printf("%d", msg[i]);
+	printf("\n");
 	
-	char *dns = malloc(128);
-	printf("Original = (%zu bytes) %s\n", strlen(msg), msg);
+	info_qnames info = to_Qnames(qnames, msg, strlen(msg)); 
+	printf("Encoded = (%d packets, ", info.nb_packets);
+
+	if (info.last_offset == 256)
+		printf("%d of 256 bytes", info.nb_packets);
+	else
+		printf("%d of 256 bytes, 1 of %d bytes)\n", info.nb_packets-1, info.last_offset);
 	
-	int offset = to_Qname_format(dns, msg, strlen(msg)); 
-	printf("Encoded = (%d bytes) ", offset);
-	
-	for (int i=0; i<offset; i++)
+	for (int i=0; i<info.nb_packets-1; i++)
+	{	
+		for (int j=0; j<256; j++)
+		{
+			printf("%d", qnames[i][j]);
+		}
+		printf("\n");
+	}
+	for (int j=0; j<info.last_offset; j++)
 	{
-		if (dns[i] >= 32 && dns[i] <= 126)
-			printf("%c", dns[i]);
-		else
-			printf("%d", dns[i]);
+		int i = info.nb_packets-1;
+		printf("%d", qnames[i][j]);
 	}
 	printf("\n");
 	
-	int msg_len = from_Qname_format(msg, dns, offset-1);
-	free(dns);
+	//for (int i=0; i<16; i++)
+	//	free(qnames[i]);
+	//free(qnames);
+	
+	/*
+	int msg_len = from_Qname(msg, dns, offset-1);
 
 	printf("Decoded = (%d bytes) %.*s\n", msg_len, msg_len, msg);
+	*/
 	return 0;
 }
