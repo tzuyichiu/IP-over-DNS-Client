@@ -19,20 +19,66 @@
 #include "DNS_Encode.h"
 #include "DNS_flag.h"
 
+
+void print(DNS_PACKET dns_packet)
+{
+    printf("\n\n*******************Begin Sent DNS Packet information*******************\n");
+    
+    printf("header->id:                 %d %d\n",   dns_packet.header->id/256, 
+                                                    dns_packet.header->id%256);
+    printf("header->qr:                 %d\n",      dns_packet.header->qr);
+    printf("header->opcode:             %d\n",      dns_packet.header->opcode);
+    printf("header->aa:                 %d\n",      dns_packet.header->aa);
+    printf("header->tc:                 %d\n",      dns_packet.header->tc);
+    printf("header->rd:                 %d\n",      dns_packet.header->rd);
+    printf("header->ra:                 %d\n",      dns_packet.header->ra);
+    printf("header->z:                  %d\n",      dns_packet.header->z);
+    printf("header->rcode:              %d\n",      dns_packet.header->rcode);    
+    printf("header->qdcount:            %d %d\n",   dns_packet.header->qdcount/256, 
+                                                    dns_packet.header->qdcount%256);
+    printf("header->ancount:            %d %d\n",   dns_packet.header->ancount/256, 
+                                                    dns_packet.header->ancount%256);
+    printf("header->nscount:            %d %d\n",   dns_packet.header->nscount/256, 
+                                                    dns_packet.header->nscount%256);
+    printf("header->arcount:            %d %d\n",   dns_packet.header->arcount/256, 
+                                                    dns_packet.header->arcount%256);
+    printf("question->qname:            ")
+    for (int i=0; i<sizeof(dns_packet.question->qname); i++)
+        printf("%d ",                               dns_packet.question->qname[i]);
+    printf("\n");
+
+    printf("question->qtype:            %d\n",      dns_packet.question->qtype);
+    printf("question->qclass:           %d\n",      dns_packet.question->qclass);
+    printf("answer->name:               %d %d\n",   dns_packet.answer->name/256, 
+                                                    dns_packet.answer->name%256);
+    printf("answer->resource->type:     %d\n",      dns_packet.answer->resource->type);
+    printf("answer->resource->rclass:   %d\n",      dns_packet.answer->resource->rclass);    
+    printf("answer->resource->ttl:      %d\n",      dns_packet.answer->resource->ttl);
+    printf("answer->resource->rdlength: %d\n",      dns_packet.answer->resource->rdlength);
+    
+    printf("answer->rdata:              ")
+    for (int i=0; i<dns_packet.answer->resource->rdlength; i++)
+        printf("%d ",                               dns_packet.answer->rdata[i]);
+    printf("\n");
+    
+    printf("********************End Sent DNS Packet information********************\n\n");
+}
+
+
 /*
  * Perform a DNS query by sending a packet combining msg and hostname
  * */
 void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg, 
                 char *host, char *ip_dns_server, int query_type)
 {
-    struct DNS_PACKET *dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
-    dnspacket->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
-    dnspacket->question          = (struct QUESTION*)   malloc(sizeof(struct QUESTION));
-    dnspacket->question->qname   = (char*)              malloc(MAX_SZ);
-    dnspacket->record            = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
-    dnspacket->record->name      = (unsigned char*)     malloc(sizeof(unsigned char)*2);
-    dnspacket->record->resource  = (struct R_DATA*)     malloc(sizeof(struct R_DATA));
-    dnspacket->record->rdata     = (unsigned char*)     malloc(sizeof(unsigned char)*2);
+    struct DNS_PACKET *dns_packet = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
+    dns_packet->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
+    dns_packet->question          = (struct QUESTION*)   malloc(sizeof(struct QUESTION));
+    dns_packet->question->qname   = (char*)              malloc(MAX_SZ);
+    dns_packet->record            = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
+    dns_packet->record->name      = (unsigned char*)     malloc(sizeof(unsigned char)*2);
+    dns_packet->record->resource  = (struct R_DATA*)     malloc(sizeof(struct R_DATA));
+    dns_packet->record->rdata     = (unsigned char*)     malloc(sizeof(unsigned char)*2);
 
     int s = *(int *) sockfd_void;
 
@@ -42,7 +88,7 @@ void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg,
     dest.sin_addr.s_addr = inet_addr(ip_dns_server);
 
     // DNS_HEADER
-    struct DNS_HEADER* header = dnspacket->header;
+    struct DNS_HEADER* header = dns_packet->header;
     
     header->id = (unsigned short) htons(getpid());
     header->qr = 0; //This is a query
@@ -112,59 +158,31 @@ void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg,
     qname[2] = ((len_split+6) >> 8) & 0xFF;
     qname[3] = (len_split+6) & 0xFF;
 
-    dnspacket->question->qname = (char*) qname;
-    dnspacket->question->qtype = htons(query_type); //type of the query, A, MX, CNAME, NS etc
-    dnspacket->question->qclass = htons(1); //its internet (lol)
+    dns_packet->question->qname = (char*) qname;
+    dns_packet->question->qtype = htons(query_type); //type of the query, A, MX, CNAME, NS etc
+    dns_packet->question->qclass = htons(1); //its internet (lol)
     
     // Record portion
-    dnspacket->record->name[0] = 0;
-    dnspacket->record->name[1] = 2;
-    dnspacket->record->rdata[0] = 0;
-    dnspacket->record->rdata[1] = 2; 
+    dns_packet->record->name[0] = 0;
+    dns_packet->record->name[1] = 2;
+    dns_packet->record->rdata[0] = 0;
+    dns_packet->record->rdata[1] = 2; 
 
-    /* print the dnspacket we just built */
-    printf("\n\n*******************Begin Sent DNS Packet information*******************\n");
-    printf("header->id: %d\n", dnspacket->header->id);
-    printf("header->rd: %d\n", dnspacket->header->rd);
-    printf("header->tc: %d\n", dnspacket->header->tc);
-    printf("header->aa: %d\n", dnspacket->header->aa);
-    printf("header->qr: %d\n", dnspacket->header->qr);
-    printf("header->opcode: %d\n", dnspacket->header->opcode);
-    printf("header->rcode: %d\n", dnspacket->header->rcode);
-    printf("header->cd: %d\n", dnspacket->header->cd);
-    printf("header->ad: %d\n", dnspacket->header->ad);
-    printf("header->z: %d\n", dnspacket->header->z);
-    printf("header->ra: %d\n", dnspacket->header->ra);
-    printf("header->q_count: %d\n", dnspacket->header->q_count);
-    printf("header->ans_count: %d\n", dnspacket->header->ans_count);
-    printf("header->auth_count: %d\n", dnspacket->header->auth_count);
-    printf("header->add_count: %d\n", dnspacket->header->add_count);
-    printf("question->qname: ");
-    for (int i = 0; i < len_qname; i++){
-        printf("%d", dnspacket->question->qname[i]);
-    }
-    printf("\n");
-    printf("question->qtype: %d\n", dnspacket->question->qtype);
-    printf("question->qclass: %d\n", dnspacket->question->qclass);
-    printf("record->name: 02\n");
-    printf("record->resource->type: %d\n", dnspacket->record->resource->type);
-    printf("record->resource->rclass: %d\n", dnspacket->record->resource->rclass);    
-    printf("record->resource->ttl: %d\n", dnspacket->record->resource->ttl);
-    printf("record->resource->data_len: %d\n", dnspacket->record->resource->data_len);
-    printf("record->rdata: 02\n\n");
-    printf("********************End Sent DNS Packet information********************\n\n");
+    /* print the dns_packet we just built */
+    
+    print(dns_packet);
 
     char buf[MAX_SZ];
-    int nb_octet_sent = Binary_from_DNS(dnspacket, buf);
+    int nb_octet_sent = Binary_from_DNS(dns_packet, buf);
 
-    free(dnspacket->record->name);
-    free(dnspacket->record->resource);
-    free(dnspacket->record->rdata);
-    free(dnspacket->record);
+    free(dns_packet->record->name);
+    free(dns_packet->record->resource);
+    free(dns_packet->record->rdata);
+    free(dns_packet->record);
     free(header);
-    //free(dnspacket->question->qname);
-    free(dnspacket->question);
-    free(dnspacket);
+    //free(dns_packet->question->qname);
+    free(dns_packet->question);
+    free(dns_packet);
 
     if (nature)
     {
@@ -183,21 +201,21 @@ void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg,
 }
 
 /* Careful! After usage, free memory of:
- * dnspacket->header & dnspacket->question->qname & dnspacket->question & dnspacket->record->name &
- * dnspacket->record->rdata & dnspacket->record & dnspacket
+ * dns_packet->header & dns_packet->question->qname & dns_packet->question & dns_packet->record->name &
+ * dns_packet->record->rdata & dns_packet->record & dns_packet
  */
 
 struct DNS_PACKET* new_from_values(unsigned char qr, char* qname, unsigned short qtype, unsigned short qclass)
 {
-    struct DNS_PACKET *dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
+    struct DNS_PACKET *dns_packet = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
 
     struct DNS_HEADER *header = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
     struct QUESTION *question = (struct QUESTION*) malloc(sizeof(struct QUESTION));
     struct RES_RECORD *record = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
 
-    dnspacket->header = header;
-    dnspacket->question = question;
-    dnspacket->record = record;
+    dns_packet->header = header;
+    dns_packet->question = question;
+    dns_packet->record = record;
 
     header->id = 0; // à utiliser dans un futur pour traquer les numéros de requête.
     header->qr = qr; // Query: 0; Response: 1. 
@@ -217,14 +235,14 @@ struct DNS_PACKET* new_from_values(unsigned char qr, char* qname, unsigned short
     header->add_count = 0;
 
     int len_qname = ((unsigned char) qname[0])*256 + (unsigned char) qname[1];
-    dnspacket->question->qname = (char*) malloc(len_qname);
-    memcpy(dnspacket->question->qname, qname, len_qname);
+    dns_packet->question->qname = (char*) malloc(len_qname);
+    memcpy(dns_packet->question->qname, qname, len_qname);
 
     question->qtype = qtype;
     question->qclass = qclass;
 
-    dnspacket->record->name = (char*) malloc(sizeof(char)*2);
-    dnspacket->record->rdata = (char*) malloc(sizeof(char)*2);
+    dns_packet->record->name = (char*) malloc(sizeof(char)*2);
+    dns_packet->record->rdata = (char*) malloc(sizeof(char)*2);
 
     record->rdata[0] = 0;
     record->rdata[1] = 2;
@@ -232,7 +250,7 @@ struct DNS_PACKET* new_from_values(unsigned char qr, char* qname, unsigned short
     record->name[1] = 2;
 
 
-    return dnspacket;
+    return dns_packet;
 }
 
 /* Careful! After usage, free memory of:
@@ -257,64 +275,64 @@ struct RES_RECORD* new_from_hash(char* name, unsigned short type, unsigned short
     return rr;
 }
 
-int Binary_from_DNS(struct DNS_PACKET *dnspacket, char* resu){
-    resu[0] = ((dnspacket->header->id) >> 8) & 0xFF;
-    resu[1] = (dnspacket->header->id) & 0xFF;
-    resu[2] = dnspacket->header->rd;
-    resu[3] = dnspacket->header->tc;
-    resu[4] = dnspacket->header->aa;
-    resu[5] = dnspacket->header->qr;
-    resu[6] = dnspacket->header->opcode;
-    resu[7] = dnspacket->header->rcode;
-    resu[8] = dnspacket->header->cd;
-    resu[9] = dnspacket->header->ad;
-    resu[10] = dnspacket->header->z;
-    resu[11] = dnspacket->header->ra;
-    resu[12] = ((dnspacket->header->q_count) >> 8) & 0xFF;
-    resu[13] = (dnspacket->header->q_count) & 0xFF;
-    resu[14] = ((dnspacket->header->ans_count) >> 8) & 0xFF;
-    resu[15] = (dnspacket->header->ans_count) & 0xFF;
-    resu[16] = ((dnspacket->header->auth_count) >> 8) & 0xFF;
-    resu[17] = (dnspacket->header->auth_count) & 0xFF;
-    resu[18] = ((dnspacket->header->add_count) >> 8) & 0xFF;
-    resu[19] = (dnspacket->header->add_count) & 0xFF;
+int Binary_from_DNS(struct DNS_PACKET *dns_packet, char* resu){
+    resu[0] = ((dns_packet->header->id) >> 8) & 0xFF;
+    resu[1] = (dns_packet->header->id) & 0xFF;
+    resu[2] = dns_packet->header->rd;
+    resu[3] = dns_packet->header->tc;
+    resu[4] = dns_packet->header->aa;
+    resu[5] = dns_packet->header->qr;
+    resu[6] = dns_packet->header->opcode;
+    resu[7] = dns_packet->header->rcode;
+    resu[8] = dns_packet->header->cd;
+    resu[9] = dns_packet->header->ad;
+    resu[10] = dns_packet->header->z;
+    resu[11] = dns_packet->header->ra;
+    resu[12] = ((dns_packet->header->q_count) >> 8) & 0xFF;
+    resu[13] = (dns_packet->header->q_count) & 0xFF;
+    resu[14] = ((dns_packet->header->ans_count) >> 8) & 0xFF;
+    resu[15] = (dns_packet->header->ans_count) & 0xFF;
+    resu[16] = ((dns_packet->header->auth_count) >> 8) & 0xFF;
+    resu[17] = (dns_packet->header->auth_count) & 0xFF;
+    resu[18] = ((dns_packet->header->add_count) >> 8) & 0xFF;
+    resu[19] = (dns_packet->header->add_count) & 0xFF;
     //end header
-    resu[20] = ((dnspacket->question->qtype) >> 8) & 0xFF;
-    resu[21] = (dnspacket->question->qtype) & 0xFF;
-    resu[22] = ((dnspacket->question->qclass) >> 8) & 0xFF;
-    resu[23] = (dnspacket->question->qclass) & 0xFF;
+    resu[20] = ((dns_packet->question->qtype) >> 8) & 0xFF;
+    resu[21] = (dns_packet->question->qtype) & 0xFF;
+    resu[22] = ((dns_packet->question->qclass) >> 8) & 0xFF;
+    resu[23] = (dns_packet->question->qclass) & 0xFF;
     //end constant fields of question
-    resu[24] = ((dnspacket->record->resource->type) >> 8) & 0xFF;
-    resu[25] = (dnspacket->record->resource->type) & 0xFF;
-    resu[26] = ((dnspacket->record->resource->rclass) >> 8) & 0xFF;
-    resu[27] = (dnspacket->record->resource->rclass) & 0xFF;
+    resu[24] = ((dns_packet->record->resource->type) >> 8) & 0xFF;
+    resu[25] = (dns_packet->record->resource->type) & 0xFF;
+    resu[26] = ((dns_packet->record->resource->rclass) >> 8) & 0xFF;
+    resu[27] = (dns_packet->record->resource->rclass) & 0xFF;
 
-    resu[28] = ((dnspacket->record->resource->ttl) >> 24) & 0xFF;
-    resu[29] = ((dnspacket->record->resource->ttl) >> 16) & 0xFF;
-    resu[30] = ((dnspacket->record->resource->ttl) >> 8) & 0xFF;
-    resu[31] = (dnspacket->record->resource->ttl) & 0xFF;
+    resu[28] = ((dns_packet->record->resource->ttl) >> 24) & 0xFF;
+    resu[29] = ((dns_packet->record->resource->ttl) >> 16) & 0xFF;
+    resu[30] = ((dns_packet->record->resource->ttl) >> 8) & 0xFF;
+    resu[31] = (dns_packet->record->resource->ttl) & 0xFF;
 
-    resu[32] = ((dnspacket->record->resource->data_len) >> 8) & 0xFF;
-    resu[33] = (dnspacket->record->resource->data_len) & 0xFF;
+    resu[32] = ((dns_packet->record->resource->data_len) >> 8) & 0xFF;
+    resu[33] = (dns_packet->record->resource->data_len) & 0xFF;
     //end constant fields of record resource
 
     //Here we finish the attibutes of constant length. 
     int indice;
     char* pointer = resu;
     pointer = pointer + 34;
-    int len_qname = ((unsigned char) dnspacket->question->qname[0])*256 + (unsigned char) dnspacket->question->qname[1];
-    memcpy(pointer, dnspacket->question->qname, len_qname);
+    int len_qname = ((unsigned char) dns_packet->question->qname[0])*256 + (unsigned char) dns_packet->question->qname[1];
+    memcpy(pointer, dns_packet->question->qname, len_qname);
     //printf("%d\n", len_qname);
     pointer = pointer + len_qname;
     indice = 34 + len_qname;
 
-    int len_rdata = ((unsigned char) dnspacket->record->rdata[0])*256 + (unsigned char) dnspacket->record->rdata[1];
-    memcpy(pointer, dnspacket->record->rdata, len_rdata);
+    int len_rdata = ((unsigned char) dns_packet->record->rdata[0])*256 + (unsigned char) dns_packet->record->rdata[1];
+    memcpy(pointer, dns_packet->record->rdata, len_rdata);
     pointer = pointer + len_rdata;
     indice = indice + len_rdata;
     
-    int len_name = ((unsigned char) dnspacket->record->name[0])*256 + (unsigned char) dnspacket->record->name[1];
-    memcpy(pointer, dnspacket->record->name, len_name);
+    int len_name = ((unsigned char) dns_packet->record->name[0])*256 + (unsigned char) dns_packet->record->name[1];
+    memcpy(pointer, dns_packet->record->name, len_name);
     indice = indice + len_name;
     resu[indice] = '\0';
     return indice;
@@ -332,14 +350,14 @@ unsigned char* substring(char* str, int start, int length){
 
 /* 
  * Careful! After usage, free memory of:
- * dnspacket & dnspacket->header & dnspacket->question & dnspacket->record & dnspacket->record->resource
+ * dns_packet & dns_packet->header & dns_packet->question & dns_packet->record & dns_packet->record->resource
  */
 struct DNS_PACKET* DNS_from_Binary(char* resu) // FALSE!
 {
-    struct DNS_PACKET *dnspacket = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
+    struct DNS_PACKET *dns_packet = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
     
-    dnspacket->header = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
-    struct DNS_HEADER *header = dnspacket->header;
+    dns_packet->header = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
+    struct DNS_HEADER *header = dns_packet->header;
     header->id = 256*resu[0]+resu[1];
     header->rd = resu[2];
     header->tc = resu[3];
@@ -356,14 +374,14 @@ struct DNS_PACKET* DNS_from_Binary(char* resu) // FALSE!
     header->auth_count = 256*resu[16]+resu[17];
     header->add_count = 256*resu[18]+resu[19];
 
-    dnspacket->question = (struct QUESTION*) malloc(sizeof(struct QUESTION));
-    struct QUESTION *question = dnspacket->question;
+    dns_packet->question = (struct QUESTION*) malloc(sizeof(struct QUESTION));
+    struct QUESTION *question = dns_packet->question;
     
     question->qtype = 256*resu[20]+resu[21];
     question->qclass = 256*resu[22]+resu[23];
 
-    dnspacket->record = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
-    struct RES_RECORD *record = dnspacket->record;
+    dns_packet->record = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
+    struct RES_RECORD *record = dns_packet->record;
     record->resource = (struct R_DATA*) malloc(sizeof(struct R_DATA));
     record->resource->type = 256*resu[24]+resu[25];
     record->resource->rclass = 256*resu[26]+resu[27];
@@ -385,10 +403,10 @@ struct DNS_PACKET* DNS_from_Binary(char* resu) // FALSE!
 
     int len_name = 256*((unsigned char) pointer[0]) + (unsigned char) pointer[1];
     record->name = substring(resu, 34 + len_qname + len_rdata, len_name); // 36+len_qname+len_rdata: 
-    dnspacket->question = question;
-    dnspacket->record = record;
+    dns_packet->question = question;
+    dns_packet->record = record;
 
-    return dnspacket;
+    return dns_packet;
 }
 
 /*

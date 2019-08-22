@@ -3,8 +3,6 @@
 #include <stdlib.h> //malloc
 
 #include "DNS_Encode.h"
-#include "DNS_flag.h"
-
 
 int to_Qname(unsigned char* qname, unsigned char* packet, int len_packet)
 {
@@ -45,10 +43,10 @@ info_qnames to_Qnames(unsigned char** qnames, unsigned char* msg, int len_msg)
 
 	while (run_msg < len_msg)
 	{
-		if (len_msg-run_msg >= 251)
+		if (len_msg-run_msg >= 250)
 		{
-			info.last_offset = to_Qname(qnames[run_qnames], msg+run_msg, 251);
-			run_msg += 251;
+			info.last_offset = to_Qname(qnames[run_qnames], msg+run_msg, 250);
+			run_msg += 250;
 		}
 		else
 		{
