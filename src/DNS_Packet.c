@@ -74,7 +74,7 @@ void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg,
     struct DNS_PACKET *dns_packet = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
     dns_packet->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
     dns_packet->question          = (struct QUESTION*)   malloc(sizeof(struct QUESTION));
-    dns_packet->question->qname   = (char*)              malloc(MAX_SZ);
+    dns_packet->question->qname   = (unsigned char*)     malloc(255);
     dns_packet->record            = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
     dns_packet->record->name      = (unsigned char*)     malloc(sizeof(unsigned char)*2);
     dns_packet->record->resource  = (struct R_DATA*)     malloc(sizeof(struct R_DATA));

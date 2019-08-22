@@ -27,10 +27,10 @@ struct HEADER
     unsigned char  z      :3;  // its z reserved        (3 bits)
     unsigned char  rcode  :4;  // response code         (4 bits)
     
-    unsigned short qdcount;    // nb question entries   (16 bits)
-    unsigned short ancount;    // nb answer entries     (16 bits: 0 or 1) :P
-    unsigned short nscount;    // nb of authorities     (16 bits: 0)
-    unsigned short arcount;    // nb of resources       (16 bits: 0)
+    unsigned short qdcount;    // nb question entries   (16 bits) (here 1)
+    unsigned short ancount;    // nb answer entries     (16 bits) (here 0 or 1)
+    unsigned short nscount;    // nb of authorities     (16 bits) (here 0)
+    unsigned short arcount;    // nb of resources       (16 bits) (here 0)
 };
  
 
@@ -40,7 +40,7 @@ struct QUESTION
      * a sequence of labels: length (1 byte) followed by name
      * length must be 63 or less (first 2 bits are 0)
      * */
-    unsigned char* qname;      // (at most 256 bytes)
+    unsigned char* qname;      // (at most 255 bytes)
     unsigned short qtype;      // (16 bits)
     unsigned short qclass;     // (16 bits)
 };
@@ -48,10 +48,10 @@ struct QUESTION
 
 struct ANSWER
 {
-    unsigned char  *name;      // (16 bits: 0 or c0 0c) :P
+    unsigned char  *name;      // (16 bits) (here 0 or c0 0c)
     unsigned short type;       // (16 bits)
     unsigned short rclass;     // (16 bits)
-    int            ttl;        // (32 bits)
+    int            ttl;        // (32 bits) (here 0)
     unsigned short rdlength;   // (16 bits)
     unsigned char  *rdata;     // (rdlength bytes)
 };
