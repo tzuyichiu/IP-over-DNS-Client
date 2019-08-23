@@ -51,7 +51,7 @@ struct ANSWER
     unsigned char  *name;      // (16 bits) (here 0 or c0 0c)
     unsigned short type;       // (16 bits)
     unsigned short rclass;     // (16 bits)
-    int            ttl;        // (32 bits) (here 0)
+    unsigned long  ttl;        // (32 bits) (here 0)
     unsigned short rdlength;   // (16 bits)
     unsigned char  *rdata;     // (rdlength bytes)
 };

@@ -71,14 +71,14 @@ void print(DNS_PACKET dns_packet)
 void DNS_Query (int nature, void* sockfd_void, char *msg, int len_msg, 
                 char *host, char *ip_dns_server, int query_type)
 {
-    struct DNS_PACKET *dns_packet = (struct DNS_PACKET*) malloc(sizeof(struct DNS_PACKET));
-    dns_packet->header            = (struct DNS_HEADER*) malloc(sizeof(struct DNS_HEADER));
-    dns_packet->question          = (struct QUESTION*)   malloc(sizeof(struct QUESTION));
-    dns_packet->question->qname   = (unsigned char*)     malloc(255);
-    dns_packet->record            = (struct RES_RECORD*) malloc(sizeof(struct RES_RECORD));
-    dns_packet->record->name      = (unsigned char*)     malloc(sizeof(unsigned char)*2);
-    dns_packet->record->resource  = (struct R_DATA*)     malloc(sizeof(struct R_DATA));
-    dns_packet->record->rdata     = (unsigned char*)     malloc(sizeof(unsigned char)*2);
+    struct DNS_PACKET *dns_packet = malloc(sizeof(struct DNS_PACKET));
+    dns_packet->header            = malloc(sizeof(struct HEADER));
+    dns_packet->question          = malloc(sizeof(struct QUESTION));
+    dns_packet->question->qname   = malloc(255);
+    dns_packet->answer            = malloc(sizeof(struct ANSWER));
+    dns_packet->answer->name      = malloc(sizeof(unsigned char)*2);
+    dns_packet->answer->resource  = malloc(sizeof(struct R_DATA));
+    dns_packet->answer->rdata     = malloc(sizeof(unsigned char)*2);
 
     int s = *(int *) sockfd_void;
 
