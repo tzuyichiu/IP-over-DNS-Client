@@ -24,8 +24,8 @@ void print(DNS_PACKET dns_packet)
 {
     printf("\n\n*******************Begin Sent DNS Packet information*******************\n");
     
-    printf("header->id:                 %d %d\n",   dns_packet.header->id/256, 
-                                                    dns_packet.header->id%256);
+    printf("header->id:                 %d %d\n",   dns_packet.header->id / 256, 
+                                                    dns_packet.header->id % 256);
     printf("header->qr:                 %d\n",      dns_packet.header->qr);
     printf("header->opcode:             %d\n",      dns_packet.header->opcode);
     printf("header->aa:                 %d\n",      dns_packet.header->aa);
@@ -34,14 +34,14 @@ void print(DNS_PACKET dns_packet)
     printf("header->ra:                 %d\n",      dns_packet.header->ra);
     printf("header->z:                  %d\n",      dns_packet.header->z);
     printf("header->rcode:              %d\n",      dns_packet.header->rcode);    
-    printf("header->qdcount:            %d %d\n",   dns_packet.header->qdcount/256, 
-                                                    dns_packet.header->qdcount%256);
-    printf("header->ancount:            %d %d\n",   dns_packet.header->ancount/256, 
-                                                    dns_packet.header->ancount%256);
-    printf("header->nscount:            %d %d\n",   dns_packet.header->nscount/256, 
-                                                    dns_packet.header->nscount%256);
-    printf("header->arcount:            %d %d\n",   dns_packet.header->arcount/256, 
-                                                    dns_packet.header->arcount%256);
+    printf("header->qdcount:            %d %d\n",   dns_packet.header->qdcount / 256, 
+                                                    dns_packet.header->qdcount % 256);
+    printf("header->ancount:            %d %d\n",   dns_packet.header->ancount / 256, 
+                                                    dns_packet.header->ancount % 256);
+    printf("header->nscount:            %d %d\n",   dns_packet.header->nscount / 256, 
+                                                    dns_packet.header->nscount % 256);
+    printf("header->arcount:            %d %d\n",   dns_packet.header->arcount / 256, 
+                                                    dns_packet.header->arcount % 256);
     printf("question->qname:            ")
     for (int i=0; i<sizeof(dns_packet.question->qname); i++)
         printf("%d ",                               dns_packet.question->qname[i]);
@@ -49,8 +49,8 @@ void print(DNS_PACKET dns_packet)
 
     printf("question->qtype:            %d\n",      dns_packet.question->qtype);
     printf("question->qclass:           %d\n",      dns_packet.question->qclass);
-    printf("answer->name:               %d %d\n",   dns_packet.answer->name/256, 
-                                                    dns_packet.answer->name%256);
+    printf("answer->name:               %d %d\n",   dns_packet.answer->name / 256,
+                                                    dns_packet.answer->name % 256);
     printf("answer->resource->type:     %d\n",      dns_packet.answer->resource->type);
     printf("answer->resource->rclass:   %d\n",      dns_packet.answer->resource->rclass);    
     printf("answer->resource->ttl:      %d\n",      dns_packet.answer->resource->ttl);
