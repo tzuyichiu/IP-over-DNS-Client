@@ -4,6 +4,7 @@
 
 #include "DNS_Constructor.h"
 #include "DNS_Packet.h"
+#include "DNS_Encode.h"
 #include "DNS_flag.h"
 
 
@@ -69,40 +70,38 @@ info_qnames msg_to_qnames(unsigned char** qnames, unsigned char* msg, int len_ms
 }
 
 
-int msg_to_DNSs(DNS_Packet* DNSs, unsigned char* msg, int len_msg)
+int msg_to_DNSs(DNS_PACKET *dns_packets, unsigned char *msg, int len_msg)
 {
 	unsigned char *qnames[len_msg/250+1]; 
 	for (int i=0; i<16; i++)
 		qnames[i] = malloc(255);
 
-	printf("Original = (1024 bytes)\n");
+	info_qnames info = msg_to_qnames(qnames, msg, len_msg);
 
-	for (int i=0; i<1024; i++)
-		printf("%d", msg[i]);
-	printf("\n");
-	
-	info_qnames info = msg_to_qnames(qnames, msg, strlen(msg)); 
-	printf("Encoded = (%d packets, ", info.nb_packets);
+	DNS_PACKET *dns_packet = dns_packets;
 
-	if (info.last_offset == 255)
-		printf("%d of 255 bytes)\n", info.nb_packets);
-	else
-		printf("%d of 255 bytes, 1 of %d bytes)\n", info.nb_packets-1, info.last_offset);
-	
-	for (int i=0; i<info.nb_packets-1; i++)
-	{	
-		for (int j=0; j<255; j++)
-		{
-			printf("%d", qnames[i][j]);
-		}
-		printf("\n");
-	}
-	for (int j=0; j<info.last_offset; j++)
+	for (int i=0; i<info.nb_packets; i++)
 	{
-		int i = info.nb_packets-1;
-		printf("%d", qnames[i][j]);
+		dns_packet->header->id 		 = getpid();
+		dns_packet->header->qr 		 = QR_CONSTANTS.QUERY;
+		dns_packet->header->opcode 	 = OPCODE_CONSTANTS.QUERY;
+		dns_packet->header->aa 		 = AA_CONSTANTS.QUERY_NAME;
+		dns_packet->header->tc 		 = TC_CONSTANTS.NOT_TRUNCATED;
+		dns_packet->header->rd 		 = RD_CONSTANTS.REC_DESIRED;
+		dns_packet->header->ra 		 = RA_CONSTANTS.REC_UNAVAILABLE;
+		dns_packet->header->z 		 = 0;
+		dns_packet->header->rcode 	 = RCODE_CONSTANTS.NO_ERROR;
+		dns_packet->header->qdcount  = 1;
+		dns_packet->header->ancount  = 0;
+		dns_packet->header->nscount  = 0;
+		dns_packet->header->arcount  = 0;
+		dns_packet->question->qname  = qnames[i];
+		dns_packet->question->qtype  = QTYPE_CONSTANTS.A;
+		dns_packet->question->qclass = CLASS_CONSTANTS.IN;
+
+		dns_packet++;
 	}
-	printf("\n");
+	return info.nb_packets;
 }
 
 
@@ -124,7 +123,8 @@ int main(int argc, char* argv[])
 		msg[strlen(msg)-1] = '\0';
 	*/
 
-	unsigned char *qnames[16]; 
+	unsigned char *qnames[len_msg/250+1]; 
+
 	for (int i=0; i<16; i++)
 		qnames[i] = malloc(255);
 
@@ -134,7 +134,8 @@ int main(int argc, char* argv[])
 		printf("%d", msg[i]);
 	printf("\n");
 	
-	info_qnames info = msg_to_qnames(qnames, msg, strlen(msg)); 
+	info_qnames info = msg_to_qnames(qnames, msg, 1024); 
+
 	printf("Encoded = (%d packets, ", info.nb_packets);
 
 	if (info.last_offset == 255)

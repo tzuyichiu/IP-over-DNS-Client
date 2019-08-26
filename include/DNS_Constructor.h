@@ -27,18 +27,19 @@ typedef struct {
  * -> [63(...)63(...)63(...)61(...)\0 (254+1 bytes)][63(...)63(...)63(...)61(...)\0 (254+1 bytes)][...]
  * @return info_qnames including the number of packets and the length of the last packet
  * */
-info_qnames msg_to_qnames(unsigned char** qnames, unsigned char* msg, int len_msg);
+
+info_qnames msg_to_qnames(unsigned char **qnames, unsigned char *msg, int len_msg);
+
 
 
 /*
  * msg_to_DNSs
- * 
- * Construct a sequence of DNS packets by transforming msg (byte arrays) into qname format 
- * and each generated qname will correspond to a DNS packet 
- * @return the number of DNS packets constructed
+ *
+ * Construct a sequence of DNS requesting packets from the received msg by transforming them into qnames,
+ * then stock then corresponding DNS requests into dns_packets
+ * @return the number of DNS requests constructed
  * */
 
-int msg_to_DNSs(DNS_Packet* DNSs, unsigned char* msg, int len_msg);
-
+int msg_to_DNSs(DNS_PACKET *dns_packets, unsigned char *msg, int len_msg);
 
 #endif
