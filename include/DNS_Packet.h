@@ -6,9 +6,11 @@
 
 struct DNS_PACKET
 {
-    struct HEADER   *header;
+    struct HEADER   header;
     struct QUESTION *question;
-    struct ANSWER   *answer;
+    struct RR       *answer;
+    struct RR       *authority;
+    struct RR       *additional;
 };
 
 
@@ -46,7 +48,7 @@ struct QUESTION
 };
 
 
-struct ANSWER
+struct RR
 {
     unsigned char  *name;      // (16 bits) (here 0 or c0 0c)
     unsigned short type;       // (16 bits)
