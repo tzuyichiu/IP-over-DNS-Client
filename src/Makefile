@@ -4,20 +4,20 @@ CFLAGS=-I$(IDIR)
 
 ODIR=obj
 
-_DEPS = DNS_Client.h DNS_Encode.h DNS_Listen.h DNS_Query.h DNS_Packet.h
+_DEPS = DNS_Constructor.h DNS_Encode.h DNS_Packet.h DNS_flag.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = DNS_Client.o DNS_Encode.o DNS_Listen.o DNS_Query.o DNS_flag.o
+_OBJ = DNS_Constructor.o DNS_Encode.o DNS_Packet.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-DNS_Client: $(OBJ)
+DNS_Constructor: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) -pthread
 
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*
+	rm -f $(ODIR)/*.o

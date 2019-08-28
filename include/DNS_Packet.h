@@ -4,18 +4,8 @@
 #define DNS_PACKET_H
 
 
-struct DNS_PACKET
-{
-    struct HEADER   header;
-    struct QUESTION *question;
-    struct RR       *answer;
-    struct RR       *authority;
-    struct RR       *additional;
-};
-
-
 // 96 bits = 12 bytes in total
-struct HEADER
+typedef struct HEADER
 {
     unsigned short id;         // identification number (16 bits)
 
@@ -33,10 +23,10 @@ struct HEADER
     unsigned short ancount;    // nb answer entries     (16 bits) (here 0 or 1)
     unsigned short nscount;    // nb of authorities     (16 bits) (here 0)
     unsigned short arcount;    // nb of resources       (16 bits) (here 0)
-};
+} HEADER;
  
 
-struct QUESTION
+typedef struct QUESTION
 {
     /* qname
      * a sequence of labels: length (1 byte) followed by name
@@ -45,10 +35,10 @@ struct QUESTION
     unsigned char* qname;      // (at most 255 bytes)
     unsigned short qtype;      // (16 bits)
     unsigned short qclass;     // (16 bits)
-};
+} QUESTION;
 
 
-struct RR
+typedef struct RR
 {
     unsigned char  *name;      // (16 bits) (here 0 or c0 0c)
     unsigned short type;       // (16 bits)
@@ -56,24 +46,24 @@ struct RR
     unsigned long  ttl;        // (32 bits) (here 0)
     unsigned short rdlength;   // (16 bits)
     unsigned char  *rdata;     // (rdlength bytes)
-};
+} RR;
+
+
+typedef struct DNS_PACKET
+{
+    HEADER         header;
+    QUESTION       *question;
+    RR             *answer;
+    RR             *authority;
+    RR             *additional;
+} DNS_PACKET;
 
 
 void print(DNS_PACKET packet);
 
 /* Perform a DNS query by sending a packet combining msg and hostname */
-void DNS_Query(int, void*, char*, int, char*, char*, int);
+//void DNS_Query(int, void*, char*, int, char*, char*, int);
 
 //void get_dns_servers(); //Get the DNS servers from /etc/resolv.conf file on Linux
-
-struct DNS_PACKET* new_from_values(unsigned char qr, char* qname, unsigned short qtype, unsigned short qclass);
-
-struct RES_RECORD* new_from_hash(char* name, unsigned short type, unsigned short rclass, unsigned int ttl, char* data);
-
-int Binary_from_DNS(struct DNS_PACKET*, char*);
-
-struct DNS_PACKET* DNS_from_Binary(char* resu);
-
-unsigned char* substring(char* str,int start, int length);
 
 #endif

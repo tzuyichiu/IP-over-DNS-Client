@@ -2,8 +2,8 @@
 #include <string.h> //strlen
 #include <stdlib.h> //malloc
 
-#include "DNS_Encode.h"
 #include "DNS_Packet.h"
+#include "DNS_Encode.h"
 
 int qname_to_bytes(unsigned char *msg, unsigned char *qname) 
 {   
@@ -57,7 +57,7 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
     // question
     for (int i=0; i<dns_packet.header.qdcount; i++)
     {
-    	offset += qname_to_bytes(bytes[12], dns_packet.question[i].qname)
+    	offset += qname_to_bytes(bytes+12, dns_packet.question[i].qname);
     
 		bytes[12+offset] = ((dns_packet.question[i].qtype  >>  8) & 0xFF);
 		bytes[13+offset] = ((dns_packet.question[i].qtype  >>  0) & 0xFF);
@@ -70,7 +70,7 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 	// answer
 	for (int i=0; i<dns_packet.header.ancount; i++)
 	{
-		offset += qname_to_bytes(bytes[16+offset], dns_packet.answer[i].name)
+		offset += qname_to_bytes(bytes+16+offset, dns_packet.answer[i].name);
 
 		bytes[16+offset] = ((dns_packet.answer[i].type 	   >>  8) & 0xFF);
 		bytes[17+offset] = ((dns_packet.answer[i].type 	   >>  0) & 0xFF);
@@ -82,7 +82,9 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 		bytes[23+offset] = ((dns_packet.answer[i].ttl 	   >>  0) & 0xFF);
 		bytes[24+offset] = ((dns_packet.answer[i].rdlength >>  8) & 0xFF);
 		bytes[25+offset] = ((dns_packet.answer[i].rdlength >>  0) & 0xFF);
-		bytes[26+offset] = ((dns_packet.answer[i].rdata    >>  0) & 0xFF);
+		
+		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
+								dns_packet.additional[i].rdlength);
 
 		offset += 11 + dns_packet.answer[i].rdlength;
 	}
@@ -90,7 +92,7 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 	// authority
 	for (int i=0; i<dns_packet.header.nscount; i++)
 	{
-		offset += qname_to_bytes(bytes[16+offset], dns_packet.authority[i].name)
+		offset += qname_to_bytes(bytes+16+offset, dns_packet.authority[i].name);
 
 		bytes[16+offset] = ((dns_packet.authority[i].type 	  >>  8) & 0xFF);
 		bytes[17+offset] = ((dns_packet.authority[i].type 	  >>  0) & 0xFF);
@@ -102,7 +104,9 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 		bytes[23+offset] = ((dns_packet.authority[i].ttl 	  >>  0) & 0xFF);
 		bytes[24+offset] = ((dns_packet.authority[i].rdlength >>  8) & 0xFF);
 		bytes[25+offset] = ((dns_packet.authority[i].rdlength >>  0) & 0xFF);
-		bytes[26+offset] = ((dns_packet.authority[i].rdata    >>  0) & 0xFF);
+		
+		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
+								dns_packet.additional[i].rdlength);
 
 		offset += 11 + dns_packet.authority[i].rdlength;
 	}
@@ -110,7 +114,7 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 	// additional
 	for (int i=0; i<dns_packet.header.arcount; i++)
 	{
-		offset += qname_to_bytes(bytes[16+offset], dns_packet.additional[i].name)
+		offset += qname_to_bytes(bytes+16+offset, dns_packet.additional[i].name);
 
 		bytes[16+offset] = ((dns_packet.additional[i].type 	   >>  8) & 0xFF);
 		bytes[17+offset] = ((dns_packet.additional[i].type 	   >>  0) & 0xFF);
@@ -122,7 +126,9 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 		bytes[23+offset] = ((dns_packet.additional[i].ttl 	   >>  0) & 0xFF);
 		bytes[24+offset] = ((dns_packet.additional[i].rdlength >>  8) & 0xFF);
 		bytes[25+offset] = ((dns_packet.additional[i].rdlength >>  0) & 0xFF);
-		bytes[26+offset] = ((dns_packet.additional[i].rdata    >>  0) & 0xFF);
+		
+		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
+								dns_packet.additional[i].rdlength);
 
 		offset += 11 + dns_packet.additional[i].rdlength;
 	}
@@ -195,8 +201,7 @@ void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 		dns_packet.answer[i].rdlength = ((bytes[26+offset] <<  8) & 0xFF00    )| 
 										((bytes[27+offset] <<  0) & 0xFF      );
 
-		for (int j=0; j<dns_packet.answer[i].rdlength; j++)
-			dns_packet.answer[i].rdata[j] = bytes[28+offset+j];
+		memcpy(dns_packet.answer[i].rdata, bytes+28+offset, dns_packet.answer[i].rdlength);
 
 		offset += 12 + dns_packet.answer[i].rdlength;
 	}
@@ -224,8 +229,7 @@ void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 		dns_packet.authority[i].rdlength = ((bytes[26+offset] <<  8) & 0xFF00    )| 
 										   ((bytes[27+offset] <<  0) & 0xFF      );
 
-		for (int j=0; j<dns_packet.authority[i].rdlength; j++)
-			dns_packet.authority[i].rdata[j] = bytes[28+offset+j];
+		memcpy(dns_packet.authority[i].rdata, bytes+28+offset, dns_packet.authority[i].rdlength);
 
 		offset += 12 + dns_packet.authority[i].rdlength;
 	}
@@ -253,8 +257,7 @@ void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 		dns_packet.additional[i].rdlength = ((bytes[26+offset] <<  8) & 0xFF00    )| 
 											((bytes[27+offset] <<  0) & 0xFF      );
 
-		for (int j=0; j<dns_packet.additional[i].rdlength; j++)
-			dns_packet.additional[i].rdata[j] = bytes[28+offset+j];
+		memcpy(dns_packet.additional[i].rdata, bytes+28+offset, dns_packet.additional[i].rdlength);
 
 		offset += 12 + dns_packet.additional[i].rdlength;
 	}
