@@ -24,8 +24,9 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet);
  * bytes_to_DNS
  *
  * transform the bytes array of length len_bytes into a DNS_PACKET and stock in dns_packet
+ * @return the length of bytes read
  * */
-void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes);
+int bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes);
 
 
 #endif

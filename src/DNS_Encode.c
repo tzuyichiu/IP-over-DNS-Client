@@ -137,7 +137,7 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 }
 
 
-void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
+int bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 {
    	// header
     dns_packet.header.id 	  =	((bytes[ 0] << 8) & 0xFF00)| 
@@ -261,6 +261,109 @@ void bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 
 		offset += 12 + dns_packet.additional[i].rdlength;
 	}
+
+	return 17+offset;
+}
+
+
+// testing purposes
+int main(int argc, char* argv[])
+{
+    int len_msg = 1024;
+    unsigned char msg[len_msg];
+
+    for (int i=0; i<len_msg-1; i++)
+    	msg[i] = 1;
+    msg[len_msg-1] = '\0';
+
+	/*
+	printf("Enter the msg to encode: ");
+	fgets(msg, 1024, stdin);
+
+	// Remove trailing newline, if there is.
+	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
+		msg[strlen(msg)-1] = '\0';
+	*/
+
+	printf("Original = (1024 bytes)\n");
+
+	for (int i=0; i<len_msg; i++)
+		printf("%d", msg[i]);
+	printf("\n\n");
+	
+	/*
+	unsigned char *qnames[len_msg/250+1]; 
+
+	for (int i=0; i<len_msg/250+1; i++)
+		qnames[i] = malloc(255);
+	*/
+
+	
+	DNS_PACKET dns_packets[len_msg/250+1]; 
+
+	for (int i=0; i<len_msg/250+1; i++)
+	{
+		dns_packets[i].question = malloc(sizeof(dns_packets[i].question));
+		dns_packets[i].question->qname = malloc(255);
+	}
+
+	int nb_packets = msg_to_DNSs(dns_packets, msg, len_msg); 
+
+	printf("Encoded = (%d packets)\n", nb_packets);
+	
+	for (int i=0; i<nb_packets; i++)
+	{
+		print(dns_packets[i]);
+		free(dns_packets[i].question->qname);
+		free(dns_packets[i].question);
+	}
+	/*
+	info_qnames info = msg_to_qnames(qnames, msg, 1024); 
+
+	printf("Encoded = (%d packets, ", info.nb_packets);
+
+	if (info.last_offset == 255)
+		printf("%d of 255 bytes)\n", info.nb_packets);
+	else
+		printf("%d of 255 bytes, 1 of %d bytes)\n", info.nb_packets-1, info.last_offset);
+	
+	for (int i=0; i<info.nb_packets-1; i++)
+	{	
+		for (int j=0; j<255; j++)
+		{
+			printf("%d", qnames[i][j]);
+		}
+		printf("\n");
+	}
+	for (int j=0; j<info.last_offset; j++)
+	{
+		int i = info.nb_packets-1;
+		printf("%d", qnames[i][j]);
+	}
+	printf("\n");
+
+	for (int i=0; i<len_msg/250+1; i++)
+		free(qnames[i]);
+	
+	int msg_len = 0;
+	unsigned char* run_msg = msg;
+
+	for (int i=0; i<info.nb_packets; i++)
+	{
+		msg_len += qname_to_bytes(run_msg, qnames[i]);
+		run_msg = msg + msg_len;
+	}
+
+	printf("Decoded = (%d bytes)\n", msg_len);
+
+	for (int i=0; i<msg_len; i++)
+		printf("%d", msg[i]);
+	printf("\n");
+
+	for (int i=0; i<16; i++)
+		free(qnames[i]);
+	*/
+	return 0;
 }
 
 
