@@ -59,9 +59,9 @@ typedef struct DNS_PACKET
 } DNS_PACKET;
 
 
-void print(DNS_PACKET packet);
+void print_DNS(DNS_PACKET packet);
 
-void print(unsigned char *bytes);
+void print_bytes(unsigned char *bytes, int len_bytes);
 
 /* Perform a DNS query by sending a packet combining msg and hostname */
 //void DNS_Query(int, void*, char*, int, char*, char*, int);

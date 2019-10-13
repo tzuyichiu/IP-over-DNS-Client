@@ -37,13 +37,6 @@ int to_qname_format(unsigned char* qname, unsigned char* packet, int len_packet)
 	return run_qname+1;
 }
 
-/*
-typedef struct {
-    int nb_packets;
-    int last_offset;
-} info_qnames;
-*/
-
 info_qnames msg_to_qnames(unsigned char** qnames, unsigned char* msg, int len_msg)
 {
 	int run_msg = 0;

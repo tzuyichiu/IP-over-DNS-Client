@@ -4,6 +4,7 @@
 
 #include "DNS_Packet.h"
 #include "DNS_Encode.h"
+#include "DNS_Constructor.h"
 
 int qname_to_bytes(unsigned char *msg, unsigned char *qname) 
 {   
@@ -287,9 +288,7 @@ int main(int argc, char* argv[])
 
 	printf("Original = (1024 bytes)\n");
 
-	for (int i=0; i<len_msg; i++)
-		printf("%d", msg[i]);
-	printf("\n\n");
+	print_bytes(msg, len_msg);
 	
 	/*
 	unsigned char *qnames[len_msg/250+1]; 
@@ -313,7 +312,7 @@ int main(int argc, char* argv[])
 	
 	for (int i=0; i<nb_packets; i++)
 	{
-		print(dns_packets[i]);
+		print_DNS(dns_packets[i]);
 		free(dns_packets[i].question->qname);
 		free(dns_packets[i].question);
 	}

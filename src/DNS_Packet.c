@@ -20,7 +20,7 @@
 #include "DNS_flag.h"
 
 
-void print(DNS_PACKET dns_packet)
+void print_DNS(DNS_PACKET dns_packet)
 {
     printf("\n");
     
@@ -114,12 +114,11 @@ void print(DNS_PACKET dns_packet)
 }
 
 
-void print(unsigned char *bytes, int len_bytes)
+void print_bytes(unsigned char *bytes, int len_bytes)
 {
-    printf("\n");
     for (int i=0; i<len_bytes; i++)
         printf("%x ", bytes[i]);
-    printf("\n");
+    printf("\n\n");
 }
 
 

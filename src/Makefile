@@ -14,7 +14,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-DNS_Constructor: $(OBJ)
+DNS_Encode: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) -pthread
 
 .PHONY: clean
