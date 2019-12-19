@@ -116,6 +116,7 @@ void print_DNS(DNS_PACKET dns_packet)
 
 void print_bytes(unsigned char *bytes, int len_bytes)
 {
+    printf("(%d bytes)\n", len_bytes);
     for (int i=0; i<len_bytes; i++)
         printf("%x ", bytes[i]);
     printf("\n\n");

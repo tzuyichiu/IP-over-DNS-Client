@@ -53,17 +53,19 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 		bytes[ 9+offset] = ((dns_packet.header.nscount     >>  0) & 0xFF);
 		bytes[10+offset] = ((dns_packet.header.arcount     >>  8) & 0xFF);
 		bytes[11+offset] = ((dns_packet.header.arcount     >>  0) & 0xFF);
-	}
-    
+
+        offset += 12;
+    }
+
     // question
     for (int i=0; i<dns_packet.header.qdcount; i++)
     {
-    	offset += qname_to_bytes(bytes+12, dns_packet.question[i].qname);
+    	offset += qname_to_bytes(bytes+offset, dns_packet.question[i].qname);
     
-		bytes[12+offset] = ((dns_packet.question[i].qtype  >>  8) & 0xFF);
-		bytes[13+offset] = ((dns_packet.question[i].qtype  >>  0) & 0xFF);
-		bytes[14+offset] = ((dns_packet.question[i].qclass >>  8) & 0xFF);
-		bytes[15+offset] = ((dns_packet.question[i].qclass >>  0) & 0xFF);
+		bytes[ 0+offset] = ((dns_packet.question[i].qtype  >>  8) & 0xFF);
+		bytes[ 1+offset] = ((dns_packet.question[i].qtype  >>  0) & 0xFF);
+		bytes[ 2+offset] = ((dns_packet.question[i].qclass >>  8) & 0xFF);
+		bytes[ 3+offset] = ((dns_packet.question[i].qclass >>  0) & 0xFF);
 
 		offset += 4;
     }
@@ -71,70 +73,70 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet)
 	// answer
 	for (int i=0; i<dns_packet.header.ancount; i++)
 	{
-		offset += qname_to_bytes(bytes+16+offset, dns_packet.answer[i].name);
+		offset += qname_to_bytes(bytes+offset, dns_packet.answer[i].name);
 
-		bytes[16+offset] = ((dns_packet.answer[i].type 	   >>  8) & 0xFF);
-		bytes[17+offset] = ((dns_packet.answer[i].type 	   >>  0) & 0xFF);
-		bytes[18+offset] = ((dns_packet.answer[i].rclass   >>  8) & 0xFF);
-		bytes[19+offset] = ((dns_packet.answer[i].rclass   >>  0) & 0xFF);
-		bytes[20+offset] = ((dns_packet.answer[i].ttl 	   >> 24) & 0xFF);
-		bytes[21+offset] = ((dns_packet.answer[i].ttl	   >> 16) & 0xFF);
-		bytes[22+offset] = ((dns_packet.answer[i].ttl 	   >>  8) & 0xFF);
-		bytes[23+offset] = ((dns_packet.answer[i].ttl 	   >>  0) & 0xFF);
-		bytes[24+offset] = ((dns_packet.answer[i].rdlength >>  8) & 0xFF);
-		bytes[25+offset] = ((dns_packet.answer[i].rdlength >>  0) & 0xFF);
+		bytes[ 0+offset] = ((dns_packet.answer[i].type 	   >>  8) & 0xFF);
+		bytes[ 1+offset] = ((dns_packet.answer[i].type 	   >>  0) & 0xFF);
+		bytes[ 2+offset] = ((dns_packet.answer[i].rclass   >>  8) & 0xFF);
+		bytes[ 3+offset] = ((dns_packet.answer[i].rclass   >>  0) & 0xFF);
+		bytes[ 4+offset] = ((dns_packet.answer[i].ttl 	   >> 24) & 0xFF);
+		bytes[ 5+offset] = ((dns_packet.answer[i].ttl	   >> 16) & 0xFF);
+		bytes[ 6+offset] = ((dns_packet.answer[i].ttl 	   >>  8) & 0xFF);
+		bytes[ 7+offset] = ((dns_packet.answer[i].ttl 	   >>  0) & 0xFF);
+		bytes[ 8+offset] = ((dns_packet.answer[i].rdlength >>  8) & 0xFF);
+		bytes[ 9+offset] = ((dns_packet.answer[i].rdlength >>  0) & 0xFF);
 		
-		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
-								dns_packet.additional[i].rdlength);
+		memcpy(bytes+10+offset, dns_packet.additional[i].rdata, 
+		    				    dns_packet.additional[i].rdlength);
 
-		offset += 11 + dns_packet.answer[i].rdlength;
+		offset += 10 + dns_packet.answer[i].rdlength;
 	}
 
 	// authority
 	for (int i=0; i<dns_packet.header.nscount; i++)
 	{
-		offset += qname_to_bytes(bytes+16+offset, dns_packet.authority[i].name);
+		offset += qname_to_bytes(bytes+offset, dns_packet.authority[i].name);
 
-		bytes[16+offset] = ((dns_packet.authority[i].type 	  >>  8) & 0xFF);
-		bytes[17+offset] = ((dns_packet.authority[i].type 	  >>  0) & 0xFF);
-		bytes[18+offset] = ((dns_packet.authority[i].rclass   >>  8) & 0xFF);
-		bytes[19+offset] = ((dns_packet.authority[i].rclass   >>  0) & 0xFF);
-		bytes[20+offset] = ((dns_packet.authority[i].ttl 	  >> 24) & 0xFF);
-		bytes[21+offset] = ((dns_packet.authority[i].ttl	  >> 16) & 0xFF);
-		bytes[22+offset] = ((dns_packet.authority[i].ttl 	  >>  8) & 0xFF);
-		bytes[23+offset] = ((dns_packet.authority[i].ttl 	  >>  0) & 0xFF);
-		bytes[24+offset] = ((dns_packet.authority[i].rdlength >>  8) & 0xFF);
-		bytes[25+offset] = ((dns_packet.authority[i].rdlength >>  0) & 0xFF);
+		bytes[ 0+offset] = ((dns_packet.authority[i].type 	  >>  8) & 0xFF);
+		bytes[ 1+offset] = ((dns_packet.authority[i].type 	  >>  0) & 0xFF);
+		bytes[ 2+offset] = ((dns_packet.authority[i].rclass   >>  8) & 0xFF);
+		bytes[ 3+offset] = ((dns_packet.authority[i].rclass   >>  0) & 0xFF);
+		bytes[ 4+offset] = ((dns_packet.authority[i].ttl 	  >> 24) & 0xFF);
+		bytes[ 5+offset] = ((dns_packet.authority[i].ttl	  >> 16) & 0xFF);
+		bytes[ 6+offset] = ((dns_packet.authority[i].ttl 	  >>  8) & 0xFF);
+		bytes[ 7+offset] = ((dns_packet.authority[i].ttl 	  >>  0) & 0xFF);
+		bytes[ 8+offset] = ((dns_packet.authority[i].rdlength >>  8) & 0xFF);
+		bytes[ 9+offset] = ((dns_packet.authority[i].rdlength >>  0) & 0xFF);
 		
-		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
+		memcpy(bytes+10+offset, dns_packet.additional[i].rdata, 
 								dns_packet.additional[i].rdlength);
 
-		offset += 11 + dns_packet.authority[i].rdlength;
+		offset += 10 + dns_packet.authority[i].rdlength;
 	}
 
 	// additional
 	for (int i=0; i<dns_packet.header.arcount; i++)
 	{
-		offset += qname_to_bytes(bytes+16+offset, dns_packet.additional[i].name);
+		offset += qname_to_bytes(bytes+offset, dns_packet.additional[i].name);
 
-		bytes[16+offset] = ((dns_packet.additional[i].type 	   >>  8) & 0xFF);
-		bytes[17+offset] = ((dns_packet.additional[i].type 	   >>  0) & 0xFF);
-		bytes[18+offset] = ((dns_packet.additional[i].rclass   >>  8) & 0xFF);
-		bytes[19+offset] = ((dns_packet.additional[i].rclass   >>  0) & 0xFF);
-		bytes[20+offset] = ((dns_packet.additional[i].ttl 	   >> 24) & 0xFF);
-		bytes[21+offset] = ((dns_packet.additional[i].ttl	   >> 16) & 0xFF);
-		bytes[22+offset] = ((dns_packet.additional[i].ttl 	   >>  8) & 0xFF);
-		bytes[23+offset] = ((dns_packet.additional[i].ttl 	   >>  0) & 0xFF);
-		bytes[24+offset] = ((dns_packet.additional[i].rdlength >>  8) & 0xFF);
-		bytes[25+offset] = ((dns_packet.additional[i].rdlength >>  0) & 0xFF);
+		bytes[ 0+offset] = ((dns_packet.additional[i].type 	   >>  8) & 0xFF);
+		bytes[ 1+offset] = ((dns_packet.additional[i].type 	   >>  0) & 0xFF);
+		bytes[ 2+offset] = ((dns_packet.additional[i].rclass   >>  8) & 0xFF);
+		bytes[ 3+offset] = ((dns_packet.additional[i].rclass   >>  0) & 0xFF);
+		bytes[ 4+offset] = ((dns_packet.additional[i].ttl 	   >> 24) & 0xFF);
+		bytes[ 5+offset] = ((dns_packet.additional[i].ttl	   >> 16) & 0xFF);
+		bytes[ 6+offset] = ((dns_packet.additional[i].ttl 	   >>  8) & 0xFF);
+		bytes[ 7+offset] = ((dns_packet.additional[i].ttl 	   >>  0) & 0xFF);
+		bytes[ 8+offset] = ((dns_packet.additional[i].rdlength >>  8) & 0xFF);
+		bytes[ 9+offset] = ((dns_packet.additional[i].rdlength >>  0) & 0xFF);
 		
-		memcpy(bytes+26+offset, dns_packet.additional[i].rdata, 
+		memcpy(bytes+10+offset, dns_packet.additional[i].rdata, 
 								dns_packet.additional[i].rdlength);
 
-		offset += 11 + dns_packet.additional[i].rdlength;
+		offset += 10 + dns_packet.additional[i].rdlength;
 	}
 
-	return 26 + offset;
+	return offset;
 }
 
 
@@ -277,28 +279,11 @@ int main(int argc, char* argv[])
     	msg[i] = 1;
     msg[len_msg-1] = '\0';
 
-	/*
-	printf("Enter the msg to encode: ");
-	fgets(msg, 1024, stdin);
-
-	// Remove trailing newline, if there is.
-	if ((strlen(msg) > 0) && (msg[strlen(msg)-1] == '\n'))
-		msg[strlen(msg)-1] = '\0';
-	*/
-
 	printf("Original = (1024 bytes)\n");
 
 	print_bytes(msg, len_msg);
 	
-	/*
-	unsigned char *qnames[len_msg/250+1]; 
-
-	for (int i=0; i<len_msg/250+1; i++)
-		qnames[i] = malloc(255);
-	*/
-
-	
-	DNS_PACKET dns_packets[len_msg/250+1]; 
+	DNS_PACKET dns_packets[len_msg/250+1];
 
 	for (int i=0; i<len_msg/250+1; i++)
 	{
@@ -310,58 +295,23 @@ int main(int argc, char* argv[])
 
 	printf("Encoded = (%d packets)\n", nb_packets);
 	
-	for (int i=0; i<nb_packets; i++)
-	{
+	unsigned char *dns_packets_binary[len_msg/250+1];
+    
+    for (int i=0; i<nb_packets; i++)
+    {
 		print_DNS(dns_packets[i]);
+        dns_packets_binary[i] = malloc(1024*sizeof(unsigned char));
+        int len_bytes = DNS_to_bytes(dns_packets_binary[i], dns_packets[i]);
+        print_bytes(dns_packets_binary[i], len_bytes);
+        free(dns_packets_binary[i]);
+    }
+    
+    for (int i=0; i<nb_packets; i++)
+	{
 		free(dns_packets[i].question->qname);
 		free(dns_packets[i].question);
 	}
-	/*
-	info_qnames info = msg_to_qnames(qnames, msg, 1024); 
-
-	printf("Encoded = (%d packets, ", info.nb_packets);
-
-	if (info.last_offset == 255)
-		printf("%d of 255 bytes)\n", info.nb_packets);
-	else
-		printf("%d of 255 bytes, 1 of %d bytes)\n", info.nb_packets-1, info.last_offset);
 	
-	for (int i=0; i<info.nb_packets-1; i++)
-	{	
-		for (int j=0; j<255; j++)
-		{
-			printf("%d", qnames[i][j]);
-		}
-		printf("\n");
-	}
-	for (int j=0; j<info.last_offset; j++)
-	{
-		int i = info.nb_packets-1;
-		printf("%d", qnames[i][j]);
-	}
-	printf("\n");
-
-	for (int i=0; i<len_msg/250+1; i++)
-		free(qnames[i]);
-	
-	int msg_len = 0;
-	unsigned char* run_msg = msg;
-
-	for (int i=0; i<info.nb_packets; i++)
-	{
-		msg_len += qname_to_bytes(run_msg, qnames[i]);
-		run_msg = msg + msg_len;
-	}
-
-	printf("Decoded = (%d bytes)\n", msg_len);
-
-	for (int i=0; i<msg_len; i++)
-		printf("%d", msg[i]);
-	printf("\n");
-
-	for (int i=0; i<16; i++)
-		free(qnames[i]);
-	*/
 	return 0;
 }
 
