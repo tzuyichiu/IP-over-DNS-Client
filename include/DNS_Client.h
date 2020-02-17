@@ -17,11 +17,8 @@ struct thread_args
 	char *host;
 };
 
-void *sending   (void *threadArgsVoid);
-void *receiving (void *threadArgsVoid);
+void send_dns(int tap_fd, int sockfd, char* ip_dns_server, char* host);
 int tun_alloc (char *dev, int flags);
 int cread  (int fd, char *buf, int n);
-int cwrite (int fd, char *buf, int n);
-int read_n (int fd, char *buf, int n);
 
 #endif

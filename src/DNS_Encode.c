@@ -6,7 +6,7 @@
 #include "DNS_Encode.h"
 #include "DNS_Constructor.h"
 
-int qname_to_bytes(unsigned char *msg, unsigned char *qname) 
+int qname_to_msg(unsigned char *msg, unsigned char *qname) 
 {   
 	int run_msg = 0;
 	int run_qname = 0;
@@ -270,6 +270,7 @@ int bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes)
 
 
 // testing purposes
+/*
 int main(int argc, char* argv[])
 {
     int len_msg = 1024;
@@ -314,8 +315,7 @@ int main(int argc, char* argv[])
 	
 	return 0;
 }
-
-
+*/
 
 
 
