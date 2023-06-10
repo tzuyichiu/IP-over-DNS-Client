@@ -21,7 +21,7 @@ client wishes to communicate with. The process is reversed for the responses.
 A crucial step in gaining full control over the data traffic is the creation of 
 a virtual interface called "tap" on the local machine. 
 Additionally, the routing table is modified to ensure that all traffic is 
-routed through this interface. The DNS_Client program reads data from the tap 
+routed through this interface. The `DNS_Client` program reads data from the tap 
 interface and encapsulates it into the DNS format. 
 The `DNS_Packet` structure encompasses all the attributes corresponding to 
 the standard protocol, and their values are assigned based on the information 

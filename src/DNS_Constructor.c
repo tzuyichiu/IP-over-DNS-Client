@@ -79,17 +79,17 @@ int msg_to_DNSs(DNS_PACKET *dns_packets, unsigned char *msg, int len_msg)
 	{
 		dns_packet->header.id 		 = getpid();
 		dns_packet->header.qr 		 = QR_QUERY;
-		dns_packet->header.opcode 	 = OPCODE_QUERY;
+		dns_packet->header.opcode  = OPCODE_QUERY;
 		dns_packet->header.aa 		 = AA_QUERY_NAME;
 		dns_packet->header.tc 		 = TC_NOT_TRUNCATED;
 		dns_packet->header.rd 		 = RD_REC_DESIRED;
 		dns_packet->header.ra 		 = RA_REC_UNAVAILABLE;
-		dns_packet->header.z 		 = 0;
+		dns_packet->header.z 		   = 0;
 		dns_packet->header.rcode 	 = RCODE_NO_ERROR;
-		dns_packet->header.qdcount   = 1;
-		dns_packet->header.ancount   = 0;
-		dns_packet->header.nscount   = 0;
-		dns_packet->header.arcount   = 0;
+		dns_packet->header.qdcount = 1;
+		dns_packet->header.ancount = 0;
+		dns_packet->header.nscount = 0;
+		dns_packet->header.arcount = 0;
 		
 		memcpy(dns_packet->question->qname, qnames[i], 255);
 		

@@ -7,10 +7,10 @@
  * qname_to_bytes
  *
  * if qname = 3www6google3com0
- * then "wwwgooglecom" will be stocked into msg
+ * then "wwwgooglecom" will be stocked into bytes
  * @return 3+6+3=12 string length
  * */
-int qname_to_msg(unsigned char *msg, unsigned char *qname);
+int qname_to_bytes(unsigned char *bytes, unsigned char *qname);
 
 /*
  * DNS_to_bytes
@@ -27,6 +27,5 @@ int DNS_to_bytes(unsigned char *bytes, DNS_PACKET dns_packet);
  * @return the length of bytes read
  * */
 int bytes_to_DNS(DNS_PACKET dns_packet, unsigned char *bytes);
-
 
 #endif
