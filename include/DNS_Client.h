@@ -17,7 +17,7 @@ struct thread_args
 	char *host;
 };
 
-void send_dns(int tap_fd, int sockfd, char *ip_dns_server, char *host);
+void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host);
 int tun_alloc(char *dev, int flags);
 int cread(int fd, char *buf, int n);
 

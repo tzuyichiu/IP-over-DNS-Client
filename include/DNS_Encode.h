@@ -4,13 +4,13 @@
 #define DNS_ENCODE_H
 
 /*
- * qname_to_bytes
+ * qname_to_msg
  *
  * if qname = 3www6google3com0
  * then "wwwgooglecom" will be stocked into bytes
  * @return 3+6+3=12 string length
  * */
-int qname_to_bytes(unsigned char *bytes, unsigned char *qname);
+int qname_to_msg(unsigned char *msg, unsigned char *qname);
 
 /*
  * DNS_to_bytes

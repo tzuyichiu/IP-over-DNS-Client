@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	if (DEBUG)
 		printf("Socket created.\n\n");
 
-	send_dns(tap_fd, sockfd, ip_dns_server, host);
+	send_DNS(tap_fd, sockfd, ip_dns_server, host);
 
 	// close socket
 	if (close(sockfd) == 0)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	}
 }
 
-void send_dns(int tap_fd, int sockfd, char *ip_dns_server, char *host)
+void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 {
 	fd_set rd_set;
 	FD_ZERO(&rd_set);
@@ -82,7 +82,8 @@ void send_dns(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 	uint16_t nread, nwrite, plength;
 
 	unsigned char msg[MAX_SZ];
-	unsigned char bytes[MAX_SZ];
+	unsigned char bytes[MAX_SZ];	
+	int counter = 0;
 
 	/* listen from tap0 */
 	while (1)
@@ -90,8 +91,8 @@ void send_dns(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 		if (DEBUG)
 			printf("LISTENING FROM tap0...\n");
 
-		memset(&msg, 0, MAX_SZ);
-		memset(&bytes, 0, MAX_SZ);
+		memset(msg, 0, MAX_SZ);
+		memset(bytes, 0, MAX_SZ);
 		nread = cread(tap_fd, msg, MAX_SZ);
 
 		if (DEBUG)
@@ -120,23 +121,41 @@ void send_dns(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 		const struct sockaddr *to = (struct sockaddr *)&to_IPv4;
 
 		// dns packets
-		DNS_PACKET dns_packets[nread / 250 + 1];
-		int nb_packets = msg_to_DNSs(dns_packets, msg, nread);
+  	int nb_packets = nread / 250 + 1;
+  	DNS_PACKET *dns_packets = calloc(nb_packets, sizeof(DNS_PACKET));
+
+  	for (int i = 0; i < nb_packets; i++)
+  	{
+			dns_packets[i].header.id = (counter++) % 65536;
+   		dns_packets[i].question = malloc(sizeof(QUESTION*));
+    	dns_packets[i].question->qname = malloc(255);
+  	}
+
+  	msg_to_DNSs(dns_packets, nb_packets, msg, nread);
+
+		if (DEBUG)
+			printf("Encoded = (%d packets)\n", nb_packets);
+
+  	unsigned char *dns_packets_bytes[nb_packets];
 
 		for (int i = 0; i < nb_packets; i++)
 		{
 			if (DEBUG)
 				print_DNS(dns_packets[i]);
-			int nb_bytes = DNS_to_bytes(bytes, dns_packets[i]);
-			int nb_bytes_sent;
-			nb_bytes_sent = sendto(sockfd, bytes, nb_bytes, 0, to, sizeof(*to));
-
+			dns_packets_bytes[i] = malloc(1024);
+			int nb_bytes = DNS_to_bytes(dns_packets_bytes[i], dns_packets[i]);
+			int nb_bytes_sent = sendto(sockfd, bytes, nb_bytes, 0, to, sizeof(*to));
 			if (DEBUG)
-			{
-				print_bytes(bytes, nb_bytes);
-				printf("\nSent. (%d bytes)\n\n", nb_bytes_sent);
-			}
+				print_bytes(dns_packets_bytes[i], nb_bytes);
+			free(dns_packets_bytes[i]);
 		}
+
+		for (int i = 0; i < nb_packets; i++)
+		{
+			free(dns_packets[i].question->qname);
+			free(dns_packets[i].question);
+		}
+		free(dns_packets);
 	}
 }
 
