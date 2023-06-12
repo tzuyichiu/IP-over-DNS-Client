@@ -6,19 +6,20 @@ ODIR=./obj
 SDIR=./src
 BDIR=./build
 
-SCRIPT=DNS_Test
+SCRIPT=test
 
-_DEPS = DNS_Client.h DNS_Constructor.h DNS_Encode.h DNS_Packet.h DNS_flag.h
+_DEPS = $(SCRIPT).h encoder.h packet.h flag.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = $(SCRIPT).o DNS_Constructor.o DNS_Encode.o DNS_Packet.o
+_OBJ = $(SCRIPT).o encoder.o packet.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	@mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(BDIR)/$(SCRIPT): $(OBJ)
+	@mkdir -p $(@D)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 .PHONY: clean

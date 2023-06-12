@@ -6,8 +6,8 @@
  * 2. Receiving thread: perform an DNS request permanently in order to get the answers from the DNS server
  * */
 
-#ifndef DNS_CLIENT_H
-#define DNS_CLIENT_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 struct thread_args
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef DNS_FLAG_H
-#define DNS_FLAG_H
+#ifndef FLAG_H
+#define FLAG_H
 
 #define MAX_SZ                4096
 #define DEBUG                 1
@@ -32,6 +32,10 @@
 #define RCODE_NOT_IMPLEMENTED 4
 #define RCODE_REFUSED         5
 
+#define LABEL_MAX_SZ          63
+#define QNAME_MAX_SZ          255
+#define INFO_PER_QNAME        250
+
 #define QTYPE_A               1
 #define QTYPE_NS              2
 #define QTYPE_MD              3
@@ -58,6 +62,9 @@
 #define CLASS_CH              3
 #define CLASS_HS              4
 #define CLASS_ALL             255
+
+#define UDP_MAX_SZ            512
+#define UDP_PORT              53
 
 /*
 struct QR_CONSTANTS

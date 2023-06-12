@@ -18,11 +18,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "DNS_Client.h"
-#include "DNS_Packet.h"
-#include "DNS_flag.h"
-#include "DNS_Encode.h"
-#include "DNS_Constructor.h"
+#include "client.h"
+#include "packet.h"
+#include "flag.h"
+#include "encoder.h"
 
 int main(int argc, char *argv[])
 {
@@ -108,7 +107,7 @@ void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 		struct sockaddr_in to_IPv4;
 		memset(&to_IPv4.sin_zero, 0, sizeof(to_IPv4.sin_zero));
 		to_IPv4.sin_family = AF_INET;
-		to_IPv4.sin_port = htons(53);
+		to_IPv4.sin_port = htons(UDP_PORT);
 		struct in_addr address;
 
 		if (!inet_pton(AF_INET, ip_dns_server, &address))
@@ -120,15 +119,15 @@ void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 		to_IPv4.sin_addr = address;
 		const struct sockaddr *to = (struct sockaddr *)&to_IPv4;
 
-		// dns packets
-  	int nb_packets = nread / 250 + 1;
-  	DNS_PACKET *dns_packets = calloc(nb_packets, sizeof(DNS_PACKET));
+		int nb_packets = nread / INFO_PER_QNAME + (nread % INFO_PER_QNAME ? 1 : 0);
+  	DNS_PACKET **dns_packets = calloc(nb_packets, sizeof(DNS_PACKET*));
 
   	for (int i = 0; i < nb_packets; i++)
   	{
-			dns_packets[i].header.id = (counter++) % 65536;
-   		dns_packets[i].question = malloc(sizeof(QUESTION*));
-    	dns_packets[i].question->qname = malloc(255);
+			dns_packets[i] = malloc(sizeof(DNS_PACKET));
+			dns_packets[i]->header.id = (counter++) % 65536;
+   		dns_packets[i]->question = malloc(sizeof(QUESTION*));
+    	dns_packets[i]->question->qname = calloc(QNAME_MAX_SZ, 1);
   	}
 
   	msg_to_DNSs(dns_packets, nb_packets, msg, nread);
@@ -142,7 +141,7 @@ void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 		{
 			if (DEBUG)
 				print_DNS(dns_packets[i]);
-			dns_packets_bytes[i] = malloc(1024);
+			dns_packets_bytes[i] = malloc(UDP_MAX_SZ);
 			int nb_bytes = DNS_to_bytes(dns_packets_bytes[i], dns_packets[i]);
 			int nb_bytes_sent = sendto(sockfd, bytes, nb_bytes, 0, to, sizeof(*to));
 			if (DEBUG)
@@ -152,8 +151,9 @@ void send_DNS(int tap_fd, int sockfd, char *ip_dns_server, char *host)
 
 		for (int i = 0; i < nb_packets; i++)
 		{
-			free(dns_packets[i].question->qname);
-			free(dns_packets[i].question);
+			free(dns_packets[i]->question->qname);
+			free(dns_packets[i]->question);
+			free(dns_packets[i]);
 		}
 		free(dns_packets);
 	}

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef DNS_PACKET_H
-#define DNS_PACKET_H
+#ifndef PACKET_H
+#define PACKET_H
 
 
 // 96 bits = 12 bytes in total
@@ -59,7 +59,7 @@ typedef struct DNS_PACKET
 } DNS_PACKET;
 
 
-void print_DNS(DNS_PACKET packet);
+void print_DNS(DNS_PACKET *packet);
 
 void print_bytes(unsigned char *bytes, int len_bytes);
 

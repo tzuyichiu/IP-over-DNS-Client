@@ -82,23 +82,26 @@ queried, stored in the `QNAME` field:
     |                     QCLASS                    |
     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 ```
-In IP-over-DNS tunneling, typical requests and responses can be wrapped inside 
-the `QNAME` field, which can contain the most information, subject to size 
-limits (see [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) Section 2.3.4).
+In IP-over-DNS tunneling, typical requests and responses can be wrapped within 
+the `QNAME` field, which allows to store the most information compared to other
+fields, subject to certain size limits 
+(refer to [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) Section 2.3.4).
 
-Specifically, the `QNAME` should be represented as a sequence of labels, where 
-each label consists of a length byte followed by the corresponding number of 
-bytes.
+The `QNAME` field consists of a sequence of labels where each label follows a 
+specific format: a length byte followed by the corresponding number of bytes.
 For example, a label like `www` would be represented as `3www`. 
-The size of a label should not exceed 63 bytes (the first two bits of the 
-length byte are reserved), the `QNAME` field itself should be 255 bytes or less, 
-and the entire DNS packet (sent as a UDP message) should be 512 bytes or less.
+The length of a label should not exceed 63 bytes (the first two bits of the 
+length byte are reserved), and the overall size of the `QNAME` field itself 
+should be 255 bytes or less, including a final null byte (0) after the labels.
 
-To wrap the standard requests and responses into DNS packets, we divide them 
-into chunks of at most 255 bytes (we use 250 for a conservative approach). 
-Each chunk is divided into labels, with each label containing at most 63 
-bytes.
-As such, each chunk can be stored inside the `QNAME` field of a single DNS packet.
+To encapsulate the standard requests and responses into DNS packets, we 
+divide them into manageable chunks.  
+Considering the length bytes and the final null byte, each DNS packet can 
+contain up to 250 bytes of information to be stored within the `QNAME` field.
+Finally, the entire DNS packet, sent as a UDP message, should not exceed 
+512 bytes. 
+As a result, each DNS packet would only contain one single `Question` section,
+i.e., `qdcount = 1`.
 
 ## Usage 1
 
@@ -108,10 +111,11 @@ easily follow these steps:
 
 1. Compile the code by executing the following command: `$ make clean; make`.
 
-2. Launch the testing script by running: `$ build/DNS_Test`.
+2. Launch the testing script by running: `$ build/test`.
 
-In this example, the message to be wrapped consists of a 1024-byte array 
-containing `0x01` in each byte.
+In this example, the message to be wrapped consists of a 512-byte array 
+containing `1 + i % 255` in each byte indexed `i` 
+(followed by a null byte at the end).
 
 ## Usage 2
 
@@ -125,12 +129,12 @@ the DNS format, please follow the steps below:
 This will ensure that all traffic directed towards `8.8.8.8` will pass through 
 the virtual interface `tap0`.
 
-3. Open the `Makefile` and modify the script name from `DNS_Test` to `DNS_Client`.
+3. Open the `Makefile` and modify the script name from `test` to `client`.
 
 4. Compile the code by entering: `$ make clean; make`.
 
 5. Launch the DNS Client by running: 
-`$ build/DNS_Client www.google.com 127.0.0.1`.
+`$ build/client www.google.com 127.0.0.1`.
 The first argument, `www.google.com`, specifies the target server for 
 communication. 
 The second argument, `127.0.0.1`, would typically be the IP address of the DNS 
@@ -148,20 +152,15 @@ These are the data that will be wrapped into DNS format and sent to the server.
 ## Remarks
 
 In fact, there are still some challenges in this project that we were unable to 
-overcome, particularly regarding listening to the response. 
-On one hand, the DNS protocol utilizes the UDP protocol, which does not involve 
-formal "handshakes." 
+overcome, particularly regarding listening to the response:
+the DNS protocol utilizes the UDP protocol, which does not involve formal 
+"handshakes." 
 Consequently, the client must continuously send "empty" messages to inquire 
-whether there are any responses from the server, as the server does not 
-spontaneously inform the client, even if, for instance, Google has already 
-responded. 
-On the other hand, our approach to transforming DNS packets into binary data 
-does not strictly adhere to the standard DNS protocol, although it is very 
-similar. 
-Consequently, a true DNS server would not be able to interpret the data 
-correctly. 
-This issue could be easily rectified; 
-however, given the complexities involved in implementing the server component, 
+whether there are any responses from the server(s), as the intermediate server 
+does not spontaneously inform the client, even if, for instance, the target 
+server has already responded to the intermediate server. 
+
+Given the complexities involved in implementing the server component, 
 we made the decision to conclude the project in a simplified manner. 
 Despite these challenges, the communication between the client and server, as 
 well as the encoding/decoding process, have been successfully accomplished.
